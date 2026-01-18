@@ -74,8 +74,8 @@ void Class_Robotic_arm::Init()
 	// PID参数初始化
 	arm_motor1.Set_K_D(1);
 	arm_motor1.Set_K_P(1.5);
-	arm_motor2.Set_K_D(5);
-	arm_motor2.Set_K_P(5);
+	arm_motor2.Set_K_D(1);
+	arm_motor2.Set_K_P(1);
 	arm_motor3.Set_K_D(1);
 	arm_motor3.Set_K_P(1.5);
 	//arm_motor1.Set_Control_Torque(0.2);
@@ -1025,7 +1025,6 @@ void Class_Robotic_arm::Robotic_TIM_Send_PeriodElapsedCallback()
 {
 	//读取当前值并设置下一个时间间隔的值
 	Robotic_Motor_Get();
-	// Transmit_Visual_Transformation_Matrix(DH_arm_motor[0].Now_Angle,DH_arm_motor[1].Now_Angle,DH_arm_motor[2].Now_Angle,DH_arm_motor[3].Now_Angle);
 	Transmit_Visual_Transformation_Matrix(DH_arm_motor[0].Next_Angle,DH_arm_motor[1].Next_Angle,DH_arm_motor[2].Next_Angle,DH_arm_motor[3].Next_Angle);
 	Robotic_Motor_Set();
 	//电机PID计算
@@ -1200,4 +1199,30 @@ void Class_Robotic_arm::Keep_Forearm_Horizontal()
 	if (fabs(IMUdata[0])<0.001)
 		return;
 	DH_arm_motor[3].Next_Angle-=IMUdata[0];
+}
+
+/*
+ * @brief 机械臂类定义的外部接口函数，便于整合部件时被调用使用，定时器1ms调用一次
+ */
+void Class_Robotic_arm::Robotic_TIM_1ms_PeriodElapsedCallback()
+{
+	//多点规划模式
+	Multi_Point_Planning_Mode();
+	//单点规划模式（即时）
+	Single_Point_Planning_Mode();
+	//视觉规划模式（即时）
+	Visual_Planning_Mode();
+	//电机PID计算
+	Robotic_TIM_Send_PeriodElapsedCallback();
+}
+
+/*
+ * @brief 机械臂类定义的外部接口函数，便于整合部件时被调用使用，放在while中空闲检测即可，或每隔一段时间调用一次
+ */
+void Class_Robotic_arm::Robotic_Main()
+{
+	//单点规划模式在主函数中的程序
+	Single_Point_Planning_Mode_Handle_Main();
+	//视觉规划模式在主函数中的程序
+	Visual_Planning_Mode_Handle_Main();
 }

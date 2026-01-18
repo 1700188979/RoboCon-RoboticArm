@@ -394,7 +394,6 @@ void USART2_IRQHandler(void)
   /* USER CODE END USART2_IRQn 0 */
   HAL_UART_IRQHandler(&huart2);
   /* USER CODE BEGIN USART2_IRQn 1 */
-  UART_DMA_Receive_IT(&huart2,&hdma_usart2_rx,buffer_receive_2,buffer_receive_length_2);
   /* USER CODE END USART2_IRQn 1 */
 }
 
@@ -408,7 +407,6 @@ void USART3_IRQHandler(void)
   /* USER CODE END USART3_IRQn 0 */
   HAL_UART_IRQHandler(&huart3);
   /* USER CODE BEGIN USART3_IRQn 1 */
-  UART_DMA_Receive_IT(&huart3,&hdma_usart3_rx,buffer_receive_3,buffer_receive_length_3);
   /* USER CODE END USART3_IRQn 1 */
 }
 
@@ -450,7 +448,6 @@ void UART5_IRQHandler(void)
   /* USER CODE END UART5_IRQn 0 */
   HAL_UART_IRQHandler(&huart5);
   /* USER CODE BEGIN UART5_IRQn 1 */
-
   /* USER CODE END UART5_IRQn 1 */
 }
 
@@ -576,6 +573,7 @@ void UART7_IRQHandler(void)
   /* USER CODE END UART7_IRQn 0 */
   HAL_UART_IRQHandler(&huart7);
   /* USER CODE BEGIN UART7_IRQn 1 */
+  UART_DMA_Receive_IT(&huart7,&hdma_uart7_rx,buffer_receive_7,buffer_receive_length_7);
 
   /* USER CODE END UART7_IRQn 1 */
 }
@@ -604,6 +602,7 @@ void USART10_IRQHandler(void)
   /* USER CODE END USART10_IRQn 0 */
   HAL_UART_IRQHandler(&huart10);
   /* USER CODE BEGIN USART10_IRQn 1 */
+  UART_DMA_Receive_IT(&huart10,&hdma_usart10_rx,buffer_receive_10,buffer_receive_length_10);
 
   /* USER CODE END USART10_IRQn 1 */
 }

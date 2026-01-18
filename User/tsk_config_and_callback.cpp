@@ -143,34 +143,43 @@ void Task1ms_TIM5_Callback()
 		// tempFloat[2]=RoboticArm.Target_Angle_Matrix[1].Matrix[2][2]*180/PI;
 		// tempFloat[3]=RoboticArm.Target_Angle_Matrix[1].Matrix[2][3]*180/PI;
 
-		// tempFloat[0]=RoboticArm.DH_arm_motor[0].Next_Angle*180/PI;
-		// tempFloat[1]=RoboticArm.DH_arm_motor[0].Next_Omega*180/PI;
-		// tempFloat[2]=RoboticArm.DH_arm_motor[1].Next_Angle*180/PI;
-		// tempFloat[3]=RoboticArm.DH_arm_motor[1].Next_Omega*180/PI;
-		// tempFloat[4]=RoboticArm.DH_arm_motor[2].Next_Angle*180/PI;
-		// tempFloat[5]=RoboticArm.DH_arm_motor[2].Next_Omega*180/PI;
+		tempFloat[0]=RoboticArm.DH_arm_motor[0].Next_Angle*180/PI;
+		tempFloat[1]=RoboticArm.DH_arm_motor[0].Next_Omega*180/PI;
+		tempFloat[2]=RoboticArm.DH_arm_motor[1].Next_Angle*180/PI;
+		tempFloat[3]=RoboticArm.DH_arm_motor[1].Next_Omega*180/PI;
+		tempFloat[4]=RoboticArm.DH_arm_motor[2].Next_Angle*180/PI;
+		tempFloat[5]=RoboticArm.DH_arm_motor[2].Next_Omega*180/PI;
 		// tempFloat[4]=RoboticArm.DH_arm_motor[3].Next_Angle*180/PI;
 		// tempFloat[5]=RoboticArm.DH_arm_motor[3].Next_Omega*180/PI;
 		// tempFloat[6]=RoboticArm.arm_motor4.Get_Target_Angle()*180/PI;
-		// tempFloat[0+8]=RoboticArm.arm_motor1.Get_Now_Angle()*180/PI;
-		// tempFloat[1+8]=RoboticArm.arm_motor1.Get_Now_Omega()*180/PI;
-		// tempFloat[2+8]=RoboticArm.arm_motor1.Get_Now_Torque();
-		// tempFloat[3+8]=RoboticArm.arm_motor2.Get_Now_Angle()*180/PI;
-		// tempFloat[4+8]=RoboticArm.arm_motor2.Get_Now_Omega()*180/PI;
-		// tempFloat[5+8]=RoboticArm.arm_motor2.Get_Now_Torque();
-		// tempFloat[6+8]=RoboticArm.arm_motor3.Get_Now_Angle()*180/PI;-
-		// tempFloat[7+8]=RoboticArm.arm_motor3.Get_Now_Omega()*180/PI;
-		// tempFloat[8+8]=RoboticArm.arm_motor3.Get_Now_Torque();
-		tempFloat[4]=RoboticArm.arm_motor4.Get_Now_Angle()*180/PI;
-		tempFloat[5]=RoboticArm.arm_motor4.Get_Now_Omega()*180/PI;
-		tempFloat[6]=(RoboticArm.DH_arm_motor[3].Next_Angle-RoboticArm.DH_arm_motor[3].bias+IMUdata[0])*180/PI;
+		// tempFloat[0+6]=RoboticArm.arm_motor1.Get_Now_Angle()*180/PI;
+		// tempFloat[1+6]=RoboticArm.arm_motor1.Get_Now_Omega()*180/PI;
+		// tempFloat[2+6]=RoboticArm.arm_motor1.Get_Now_Torque();
+		tempFloat[3+3]=RoboticArm.arm_motor2.Get_Now_Angle()*180/PI;
+		tempFloat[4+3]=RoboticArm.arm_motor2.Get_Now_Omega()*180/PI;
+		tempFloat[5+3]=RoboticArm.arm_motor2.Get_Now_Torque();
+		tempFloat[3+6]=RoboticArm.arm_motor2.Get_Control_Angle()*180/PI;
+		tempFloat[4+6]=RoboticArm.arm_motor2.Get_Control_Omega()*180/PI;
+		tempFloat[5+6]=RoboticArm.arm_motor2.Get_Control_Torque();
+		// tempFloat[6+6]=RoboticArm.arm_motor3.Get_Now_Angle()*180/PI;
+		// tempFloat[7+6]=RoboticArm.arm_motor3.Get_Now_Omega()*180/PI;
+		// tempFloat[8+6]=RoboticArm.arm_motor3.Get_Now_Torque();
+		// tempFloat[4]=RoboticArm.arm_motor4.Get_Now_Angle()*180/PI;
+		// tempFloat[5]=RoboticArm.arm_motor4.Get_Now_Omega()*180/PI;
+		// tempFloat[6]=(RoboticArm.DH_arm_motor[3].Next_Angle-RoboticArm.DH_arm_motor[3].bias+IMUdata[0])*180/PI;
 
-		tempFloat[0]=IMUdata[0]*180/PI;
-		tempFloat[1]=IMUdata[1]*180/PI;
-		tempFloat[2]=IMUdata[2]*180/PI;
-		tempFloat[3]=IMUdata[3]*180/PI;
+		tempFloat[0+12]=IMUdata[0]*180/PI;
+		tempFloat[1+12]=IMUdata[1]*180/PI;
+		tempFloat[2+12]=IMUdata[2]*180/PI;
+		tempFloat[3+12]=IMUdata[3]*180/PI;
 
-		Vofa_Transmit(&huart1,10);
+		tempFloat[0+16]=Data_Visual_Receive.x;
+		tempFloat[1+16]=Data_Visual_Receive.y;
+		tempFloat[2+16]=Data_Visual_Receive.z;
+		// tempFloat[0+16]=RoboticArm.Intime_x;
+		// tempFloat[1+16]=RoboticArm.Intime_y;
+		// tempFloat[2+16]=RoboticArm.Intime_z;
+		Vofa_Transmit(&huart1,19);
 	}
 
 	//1000Hz
@@ -179,14 +188,8 @@ void Task1ms_TIM5_Callback()
 	if (data_mod1 == 1)
 	{
 		data_mod1 = 0;
-		//多点规划模式
-		RoboticArm.Multi_Point_Planning_Mode();
-		//单点规划模式（即时）
-		RoboticArm.Single_Point_Planning_Mode();
-		//视觉规划模式（即时）
-		RoboticArm.Visual_Planning_Mode();
-		//电机PID计算
-		RoboticArm.Robotic_TIM_Send_PeriodElapsedCallback();
+
+		RoboticArm.Robotic_TIM_1ms_PeriodElapsedCallback();
 	}
 }
 /**
@@ -195,7 +198,7 @@ void Task1ms_TIM5_Callback()
  */
 void Task_Init()
 {
-	HAL_Delay(1000);
+	HAL_Delay(2000);
 
 	// FDCAN 总线初始化
 	FDCAN_Init(&hfdcan1, Device_FDCAN1_Callback);
@@ -204,8 +207,8 @@ void Task_Init()
 
     // UART初始化
     UART_DMA_Receive_init(&huart1, buffer_receive_1, buffer_receive_length_1);//配置串口1接收VOFA+
-	UART_DMA_Receive_init(&huart2, buffer_receive_2, buffer_receive_length_2);//配置串口2接收陀螺仪
-	UART_DMA_Receive_init(&huart3, buffer_receive_3, buffer_receive_length_3);//配置串口3接收摄像头
+	UART_DMA_Receive_init(&huart7, buffer_receive_7, buffer_receive_length_7);//配置串口7接收陀螺仪
+	UART_DMA_Receive_init(&huart10, buffer_receive_10, buffer_receive_length_10);//配置串口10接收摄像头
 
     // 定时器初始化
     TIM_Init(&htim5, Task1ms_TIM5_Callback);
@@ -239,10 +242,7 @@ void Task_Init()
     init_finished = true;
     while (1)
     {
-    	//单点规划模式在主函数中的程序
-    	RoboticArm.Single_Point_Planning_Mode_Handle_Main();
-    	//视觉规划模式在主函数中的程序
-    	RoboticArm.Visual_Planning_Mode_Handle_Main();
+    	RoboticArm.Robotic_Main();
 
     	// RoboticArm.DH_arm_motor[0].Next_Angle=Vofa_Slider1;
     	// RoboticArm.DH_arm_motor[1].Next_Angle=Vofa_Slider2;

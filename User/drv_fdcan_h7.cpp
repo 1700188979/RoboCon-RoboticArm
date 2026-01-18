@@ -161,7 +161,7 @@ uint8_t FDCAN_Send_Data(FDCAN_HandleTypeDef *hfdcan, uint32_t ID, uint8_t *Data,
  */
 void TIM_1ms_FDCAN_PeriodElapsedCallback()
 {
-    FDCAN_Send_Data(&hfdcan1, 0x200, FDCAN1_0x200_Tx_Data, 8, FDCAN_STANDARD_ID,FDCAN_DATA_TYPE);
+    FDCAN_Send_Data(&hfdcan2, 0x200, FDCAN2_0x200_Tx_Data, 8, FDCAN_STANDARD_ID,FDCAN_DATA_TYPE);
 }
 
 /* -------------------------------------------------------------------------- */

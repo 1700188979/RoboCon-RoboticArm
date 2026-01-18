@@ -93,15 +93,15 @@ void UART_DMA_Receive_IT(UART_HandleTypeDef *usart, DMA_HandleTypeDef *DMA, uint
      uint8_t real_length = length - (uint8_t)(((DMA_Stream_TypeDef *)DMA->Instance)->NDTR);
 
       if(usart == &huart1) UART1_Receive_Serve(buffer, real_length);//选择解码程序
-      if(usart == &huart2) UART2_Receive_Serve(buffer, real_length);//选择解码程序
-      if(usart == &huart3) UART3_Receive_Serve(buffer, real_length);//选择解码程序
-      //if(usart == &huart4) UART4_Receive_Serve(buffer, real_length);//选择解码程序
-      //if(usart == &huart5) UART5_Receive_Serve(buffer, real_length);//选择解码程序
-      //if(usart == &huart6) UART6_Receive_Serve(buffer, real_length);//选择解码程序
-      //if(usart == &huart7) UART7_Receive_Serve(buffer, real_length);//选择解码程序
-      //if(usart == &huart8) UART8_Receive_Serve(buffer, real_length);//选择解码程序
-      //if(usart == &huart9) UART9_Receive_Serve(buffer, real_length);//选择解码程序
-      //if(usart == &huart10) UART10_Receive_Serve(buffer, real_length);//选择解码程序
+      // if(usart == &huart2) UART2_Receive_Serve(buffer, real_length);//选择解码程序
+      // if(usart == &huart3) UART3_Receive_Serve(buffer, real_length);//选择解码程序
+      // if(usart == &huart4) UART4_Receive_Serve(buffer, real_length);//选择解码程序
+      // if(usart == &huart5) UART5_Receive_Serve(buffer, real_length);//选择解码程序
+      // if(usart == &huart6) UART6_Receive_Serve(buffer, real_length);//选择解码程序
+      if(usart == &huart7) UART7_Receive_Serve(buffer, real_length);//选择解码程序
+      // if(usart == &huart8) UART8_Receive_Serve(buffer, real_length);//选择解码程序
+      // if(usart == &huart9) UART9_Receive_Serve(buffer, real_length);//选择解码程序
+      if(usart == &huart10) UART10_Receive_Serve(buffer, real_length);//选择解码程序
       memset(buffer,0,real_length);
 	  HAL_UART_Receive_DMA(usart, buffer, length);//重新打开DMA接收
  }
@@ -128,27 +128,27 @@ void HAL_UART_ErrorCallback (UART_HandleTypeDef *huart)
 //UART1中断接收函数
 static void UART1_Receive_Serve(uint8_t *buffer, uint8_t length)
 {
+    // Vofa_UART_Receive(buffer, length);
     if (Vofa_Receive_flag==0)
     {
         Vofa_UART_Receive(buffer, length);
         Vofa_Receive_flag=1;
     }
-
 }
-//UART2中断接收函数
-static void UART2_Receive_Serve(uint8_t *buffer, uint8_t length)
-{
-    IMU_get_measer(buffer,length);
-}
-//UART3中断接收函数
-static void UART3_Receive_Serve(uint8_t *buffer, uint8_t length)
-{
-    if (VS_Receive_flag==0)
-    {
-        Visual_Get_Convert(buffer,length);
-        VS_Receive_flag=1;
-    }
-}
+// //UART2中断接收函数
+// static void UART2_Receive_Serve(uint8_t *buffer, uint8_t length)
+// {
+//     IMU_get_measer(buffer,length);
+// }
+// //UART3中断接收函数
+// static void UART3_Receive_Serve(uint8_t *buffer, uint8_t length)
+// {
+//     if (VS_Receive_flag==0)
+//     {
+//         Visual_Get_Convert(buffer,length);
+//         VS_Receive_flag=1;
+//     }
+// }
 // //UART4中断接收函数
 // static void UART4_Receive_Serve(uint8_t *buffer, uint8_t length)
 // {
@@ -157,7 +157,7 @@ static void UART3_Receive_Serve(uint8_t *buffer, uint8_t length)
 // //UART5中断接收函数
 // static void UART5_Receive_Serve(uint8_t *buffer, uint8_t length)
 // {
-//     HAL_UART_Transmit(&huart5,buffer,length,0xff);
+//     IMU_get_measer(buffer,length);
 // }
 // //UART6中断接收函数
 // static void UART6_Receive_Serve(uint8_t *buffer, uint8_t length)
@@ -165,12 +165,11 @@ static void UART3_Receive_Serve(uint8_t *buffer, uint8_t length)
 //
 //     //HAL_UART_Transmit(&huart6,buffer,length,0xff);
 // }
-// //UART7中断接收函数
-// static void UART7_Receive_Serve(uint8_t *buffer, uint8_t length)
-// {
-//
-//     //HAL_UART_Transmit(&huart7,buffer,length,0xff);
-// }
+//UART7中断接收函数
+static void UART7_Receive_Serve(uint8_t *buffer, uint8_t length)
+{
+    IMU_get_measer(buffer,length);
+}
 //UART8中断接收函数
 // static void UART8_Receive_Serve(uint8_t *buffer, uint8_t length)
 // {
@@ -184,8 +183,11 @@ static void UART3_Receive_Serve(uint8_t *buffer, uint8_t length)
 //     //HAL_UART_Transmit(&huart9,buffer,length,0xff);
 // }
 //UART10中断接收函数
-// static void UART10_Receive_Serve(uint8_t *buffer, uint8_t length)
-// {
-//
-//     //HAL_UART_Transmit(&huart10,buffer,length,0xff);
-// }
+static void UART10_Receive_Serve(uint8_t *buffer, uint8_t length)
+{
+    if (VS_Receive_flag==0)
+    {
+        Visual_Get_Convert(buffer,length);
+        VS_Receive_flag=1;
+    }
+}

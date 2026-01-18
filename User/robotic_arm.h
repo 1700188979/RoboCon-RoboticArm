@@ -128,6 +128,10 @@ public:
 
     void Keep_Forearm_Horizontal();
 
+    void Robotic_TIM_1ms_PeriodElapsedCallback();
+
+    void Robotic_Main();
+
     /*      从下至上为轴 1 2 3 4    */
     Class_Motor_DM_Normal arm_motor1;   //轴1 motor_DM_J4340
     Class_Motor_DM_Normal arm_motor2;   //轴2 motor_DM_J4310

@@ -34,16 +34,16 @@
 #include "main.h"
 #include "usart.h"
 
-#define buffer_receive_length_1 50
-#define buffer_receive_length_2 100
-#define buffer_receive_length_3 80
+#define buffer_receive_length_1 80
+#define buffer_receive_length_2 50
+#define buffer_receive_length_3 50
 #define buffer_receive_length_4 50
 #define buffer_receive_length_5 50
 #define buffer_receive_length_6 50
-#define buffer_receive_length_7 50
+#define buffer_receive_length_7 100
 #define buffer_receive_length_8 50
 #define buffer_receive_length_9 50
-#define buffer_receive_length_10 50
+#define buffer_receive_length_10 80
 
 extern uint8_t buffer_receive_1[buffer_receive_length_1];//缓存数组全局定义
 extern uint8_t buffer_receive_2[buffer_receive_length_2];//缓存数组全局定义
