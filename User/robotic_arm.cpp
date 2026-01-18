@@ -1025,7 +1025,9 @@ void Class_Robotic_arm::Robotic_TIM_Send_PeriodElapsedCallback()
 {
 	//读取当前值并设置下一个时间间隔的值
 	Robotic_Motor_Get();
-	Transmit_Visual_Transformation_Matrix(DH_arm_motor[0].Next_Angle,DH_arm_motor[1].Next_Angle,DH_arm_motor[2].Next_Angle,DH_arm_motor[3].Next_Angle);
+	// Transmit_Visual_Transformation_Matrix(DH_arm_motor[0].Now_Angle,DH_arm_motor[1].Now_Angle,DH_arm_motor[2].Now_Angle,DH_arm_motor[3].Now_Angle);
+	//仅测试用
+	// Transmit_Visual_Transformation_Matrix(DH_arm_motor[0].Next_Angle,DH_arm_motor[1].Next_Angle,DH_arm_motor[2].Next_Angle,DH_arm_motor[3].Next_Angle);
 	Robotic_Motor_Set();
 	//电机PID计算
 	arm_motor1.TIM_Send_PeriodElapsedCallback();

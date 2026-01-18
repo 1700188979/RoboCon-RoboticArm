@@ -180,6 +180,7 @@ void Task1ms_TIM5_Callback()
 		// tempFloat[1+16]=RoboticArm.Intime_y;
 		// tempFloat[2+16]=RoboticArm.Intime_z;
 		Vofa_Transmit(&huart1,19);
+		Transmit_Visual_Transformation_Matrix(RoboticArm.DH_arm_motor[0].Next_Angle,RoboticArm.DH_arm_motor[1].Next_Angle,RoboticArm.DH_arm_motor[2].Next_Angle,RoboticArm.DH_arm_motor[3].Next_Angle);
 	}
 
 	//1000Hz

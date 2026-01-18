@@ -166,6 +166,7 @@ static void UART1_Receive_Serve(uint8_t *buffer, uint8_t length)
 //     //HAL_UART_Transmit(&huart6,buffer,length,0xff);
 // }
 //UART7中断接收函数
+//DMA要开circle模式
 static void UART7_Receive_Serve(uint8_t *buffer, uint8_t length)
 {
     IMU_get_measer(buffer,length);
@@ -183,6 +184,7 @@ static void UART7_Receive_Serve(uint8_t *buffer, uint8_t length)
 //     //HAL_UART_Transmit(&huart9,buffer,length,0xff);
 // }
 //UART10中断接收函数
+//DMA无需开circle模式
 static void UART10_Receive_Serve(uint8_t *buffer, uint8_t length)
 {
     if (VS_Receive_flag==0)

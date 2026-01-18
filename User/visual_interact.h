@@ -10,7 +10,7 @@
 #define VISUAL_FRAME_HEADER 0x0A
 #define VISUAL_FRAME_TAIL 0x6B
 
-#define VISUAL_UART huart3
+#define VISUAL_UART huart10
 /**
  * @brief openmv数据接收处理函数
  *     0x0A x y z 0x6b
