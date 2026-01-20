@@ -138,50 +138,9 @@ void Task1ms_TIM5_Callback()
 	if (interaction_mod10 == 10)
 	{
 		interaction_mod10 = 0;
-		// tempFloat[0]=RoboticArm.Target_Angle_Matrix[1].Matrix[2][0]*180/PI;
-		// tempFloat[1]=RoboticArm.Target_Angle_Matrix[1].Matrix[2][1]*180/PI;
-		// tempFloat[2]=RoboticArm.Target_Angle_Matrix[1].Matrix[2][2]*180/PI;
-		// tempFloat[3]=RoboticArm.Target_Angle_Matrix[1].Matrix[2][3]*180/PI;
 
-		tempFloat[0]=RoboticArm.DH_arm_motor[0].Next_Angle*180/PI;
-		tempFloat[1]=RoboticArm.DH_arm_motor[0].Next_Omega*180/PI;
-		tempFloat[2]=RoboticArm.DH_arm_motor[1].Next_Angle*180/PI;
-		tempFloat[3]=RoboticArm.DH_arm_motor[1].Next_Omega*180/PI;
-		tempFloat[4]=RoboticArm.DH_arm_motor[2].Next_Angle*180/PI;
-		tempFloat[5]=RoboticArm.DH_arm_motor[2].Next_Omega*180/PI;
-		// tempFloat[4]=RoboticArm.DH_arm_motor[3].Next_Angle*180/PI;
-		// tempFloat[5]=RoboticArm.DH_arm_motor[3].Next_Omega*180/PI;
-		// tempFloat[6]=RoboticArm.arm_motor4.Get_Target_Angle()*180/PI;
-		// tempFloat[0+6]=RoboticArm.arm_motor1.Get_Now_Angle()*180/PI;
-		// tempFloat[1+6]=RoboticArm.arm_motor1.Get_Now_Omega()*180/PI;
-		// tempFloat[2+6]=RoboticArm.arm_motor1.Get_Now_Torque();
-		tempFloat[3+3]=RoboticArm.arm_motor2.Get_Now_Angle()*180/PI;
-		tempFloat[4+3]=RoboticArm.arm_motor2.Get_Now_Omega()*180/PI;
-		tempFloat[5+3]=RoboticArm.arm_motor2.Get_Now_Torque();
-		tempFloat[3+6]=RoboticArm.arm_motor2.Get_Control_Angle()*180/PI;
-		tempFloat[4+6]=RoboticArm.arm_motor2.Get_Control_Omega()*180/PI;
-		tempFloat[5+6]=RoboticArm.arm_motor2.Get_Control_Torque();
-		// tempFloat[6+6]=RoboticArm.arm_motor3.Get_Now_Angle()*180/PI;
-		// tempFloat[7+6]=RoboticArm.arm_motor3.Get_Now_Omega()*180/PI;
-		// tempFloat[8+6]=RoboticArm.arm_motor3.Get_Now_Torque();
-		// tempFloat[4]=RoboticArm.arm_motor4.Get_Now_Angle()*180/PI;
-		// tempFloat[5]=RoboticArm.arm_motor4.Get_Now_Omega()*180/PI;
-		// tempFloat[6]=(RoboticArm.DH_arm_motor[3].Next_Angle-RoboticArm.DH_arm_motor[3].bias+IMUdata[0])*180/PI;
-
-		tempFloat[0+12]=IMUdata[0]*180/PI;
-		tempFloat[1+12]=IMUdata[1]*180/PI;
-		tempFloat[2+12]=IMUdata[2]*180/PI;
-		tempFloat[3+12]=IMUdata[3]*180/PI;
-
-		tempFloat[0+16]=Data_Visual_Receive.x;
-		tempFloat[1+16]=Data_Visual_Receive.y;
-		tempFloat[2+16]=Data_Visual_Receive.z;
-		// tempFloat[0+16]=RoboticArm.Intime_x;
-		// tempFloat[1+16]=RoboticArm.Intime_y;
-		// tempFloat[2+16]=RoboticArm.Intime_z;
-		Vofa_Transmit(&huart1,19);
 		Transmit_Visual_Transformation_Matrix(RoboticArm.DH_arm_motor[0].Next_Angle,RoboticArm.DH_arm_motor[1].Next_Angle,RoboticArm.DH_arm_motor[2].Next_Angle,RoboticArm.DH_arm_motor[3].Next_Angle);
-	}
+		}
 
 	//1000Hz
 	static int data_mod1 = 0;
@@ -244,6 +203,48 @@ void Task_Init()
     while (1)
     {
     	RoboticArm.Robotic_Main();
+		// tempFloat[0]=RoboticArm.Target_Angle_Matrix[1].Matrix[2][0]*180/PI;
+		// tempFloat[1]=RoboticArm.Target_Angle_Matrix[1].Matrix[2][1]*180/PI;
+		// tempFloat[2]=RoboticArm.Target_Angle_Matrix[1].Matrix[2][2]*180/PI;
+		// tempFloat[3]=RoboticArm.Target_Angle_Matrix[1].Matrix[2][3]*180/PI;
+
+		tempFloat[0]=RoboticArm.DH_arm_motor[0].Next_Angle*180/PI;
+		tempFloat[1]=RoboticArm.DH_arm_motor[0].Next_Omega*180/PI;
+		tempFloat[2]=RoboticArm.DH_arm_motor[1].Next_Angle*180/PI;
+		tempFloat[3]=RoboticArm.DH_arm_motor[1].Next_Omega*180/PI;
+		tempFloat[4]=RoboticArm.DH_arm_motor[2].Next_Angle*180/PI;
+		tempFloat[5]=RoboticArm.DH_arm_motor[2].Next_Omega*180/PI;
+		// tempFloat[4]=RoboticArm.DH_arm_motor[3].Next_Angle*180/PI;
+		// tempFloat[5]=RoboticArm.DH_arm_motor[3].Next_Omega*180/PI;
+		// tempFloat[6]=RoboticArm.arm_motor4.Get_Target_Angle()*180/PI;
+		// tempFloat[0+6]=RoboticArm.arm_motor1.Get_Now_Angle()*180/PI;
+		// tempFloat[1+6]=RoboticArm.arm_motor1.Get_Now_Omega()*180/PI;
+		// tempFloat[2+6]=RoboticArm.arm_motor1.Get_Now_Torque();
+		tempFloat[3+3]=RoboticArm.arm_motor2.Get_Now_Angle()*180/PI;
+		tempFloat[4+3]=RoboticArm.arm_motor2.Get_Now_Omega()*180/PI;
+		tempFloat[5+3]=RoboticArm.arm_motor2.Get_Now_Torque();
+		tempFloat[3+6]=RoboticArm.arm_motor2.Get_Control_Angle()*180/PI;
+		tempFloat[4+6]=RoboticArm.arm_motor2.Get_Control_Omega()*180/PI;
+		tempFloat[5+6]=RoboticArm.arm_motor2.Get_Control_Torque();
+		// tempFloat[6+6]=RoboticArm.arm_motor3.Get_Now_Angle()*180/PI;
+		// tempFloat[7+6]=RoboticArm.arm_motor3.Get_Now_Omega()*180/PI;
+		// tempFloat[8+6]=RoboticArm.arm_motor3.Get_Now_Torque();
+		// tempFloat[4]=RoboticArm.arm_motor4.Get_Now_Angle()*180/PI;
+		// tempFloat[5]=RoboticArm.arm_motor4.Get_Now_Omega()*180/PI;
+		// tempFloat[6]=(RoboticArm.DH_arm_motor[3].Next_Angle-RoboticArm.DH_arm_motor[3].bias+IMUdata[0])*180/PI;
+
+		tempFloat[0+12]=IMUdata[0]*180/PI;
+		tempFloat[1+12]=IMUdata[1]*180/PI;
+		tempFloat[2+12]=IMUdata[2]*180/PI;
+		tempFloat[3+12]=IMUdata[3]*180/PI;
+
+		tempFloat[0+16]=Data_Visual_Receive.x;
+		tempFloat[1+16]=Data_Visual_Receive.y;
+		tempFloat[2+16]=Data_Visual_Receive.z;
+		// tempFloat[0+16]=RoboticArm.Intime_x;
+		// tempFloat[1+16]=RoboticArm.Intime_y;
+		// tempFloat[2+16]=RoboticArm.Intime_z;
+		Vofa_Transmit(&huart1,19);
 
     	// RoboticArm.DH_arm_motor[0].Next_Angle=Vofa_Slider1;
     	// RoboticArm.DH_arm_motor[1].Next_Angle=Vofa_Slider2;
