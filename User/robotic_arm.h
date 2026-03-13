@@ -8,9 +8,10 @@
 #include "dvc_motor_dji_h7.h"
 #include "dvc_motor_dm_h7.h"
 
-#define Shortest_Interval 0.001f                 //两点之间最小时间间隔1ms
-#define POS_MAX_NUM 50                          //路径规划中间点+终点最多20个点
-#define Turning_Acceleration 0.5f               //转向时的角加速度绝对值0.5m/(s*s)
+#define Shortest_Interval 0.01f                // 两点之间最小时间间隔1ms
+#define POS_MAX_NUM 50                          // 路径规划中间点+终点最多20个点
+#define Turning_Acceleration 0.5f               // 转向时的角加速度绝对值0.5m/(s*s)
+#define Suction_Distence 0.60f                  // 吸盘高度
 
 // 定义4x4矩阵结构体
 typedef struct {
@@ -132,11 +133,13 @@ public:
 
     void Robotic_Main();
 
+    void Air_Pump(uint8_t status);
+
     /*      从下至上为轴 1 2 3 4    */
     Class_Motor_DM_Normal arm_motor1;   //轴1 motor_DM_J4340
     Class_Motor_DM_Normal arm_motor2;   //轴2 motor_DM_J4310
     Class_Motor_DM_Normal arm_motor3;   //轴3 motor_DM_J4310
-    Class_Motor_DJI_C620  arm_motor4;   //轴4 motor_DJI_3508
+    Class_Motor_DM_Normal arm_motor4;   //轴4 motor_DJI_3508
 
     uint8_t path_finish_flag=1;
 

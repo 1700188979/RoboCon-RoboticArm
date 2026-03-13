@@ -43,19 +43,24 @@ void Device_FDCAN1_Callback(Struct_FDCAN_Rx_Buffer *FDCAN_RxMessage)
 
 		switch (FDCAN_RxMessage->Header.Identifier)
 		{
-			case 0x04:
+			case 0x05:
 			{
 				RoboticArm.arm_motor1.FDCAN_RxCpltCallback(FDCAN_RxMessage->Data);
 				break;
 			}
-			case 0x05:
+			case 0x06:
 			{
 				RoboticArm.arm_motor2.FDCAN_RxCpltCallback(FDCAN_RxMessage->Data);
 				break;
 			}
-			case 0x06:
+			case 0x07:
 			{
 				RoboticArm.arm_motor3.FDCAN_RxCpltCallback(FDCAN_RxMessage->Data);
+				break;
+			}
+			case 0x08:
+			{
+				RoboticArm.arm_motor4.FDCAN_RxCpltCallback(FDCAN_RxMessage->Data);
 				break;
 			}
 			default:
@@ -84,11 +89,6 @@ void Device_FDCAN2_Callback(Struct_FDCAN_Rx_Buffer *FDCAN_RxMessage)
 
 		switch (FDCAN_RxMessage->Header.Identifier)
 		{
-			case 0x201:
-			{
-				RoboticArm.arm_motor4.FDCAN_RxCpltCallback(FDCAN_RxMessage->Data);
-				break;
-			}
 			default:
 				break;
 		}
@@ -139,13 +139,14 @@ void Task1ms_TIM5_Callback()
 	{
 		interaction_mod10 = 0;
 
-		Transmit_Visual_Transformation_Matrix(RoboticArm.DH_arm_motor[0].Next_Angle,RoboticArm.DH_arm_motor[1].Next_Angle,RoboticArm.DH_arm_motor[2].Next_Angle,RoboticArm.DH_arm_motor[3].Next_Angle);
-		}
+		// Transmit_Visual_Transformation_Matrix(RoboticArm.DH_arm_motor[0].Next_Angle,RoboticArm.DH_arm_motor[1].Next_Angle,RoboticArm.DH_arm_motor[2].Next_Angle,RoboticArm.DH_arm_motor[3].Next_Angle);
+		// Transmit_Visual_Transformation_Matrix(RoboticArm.DH_arm_motor[0].Now_Angle,RoboticArm.DH_arm_motor[1].Now_Angle,RoboticArm.DH_arm_motor[2].Now_Angle,RoboticArm.DH_arm_motor[3].Now_Angle);
+	}
 
 	//1000Hz
 	static int data_mod1 = 0;
 	data_mod1++;
-	if (data_mod1 == 1)
+	if (data_mod1 == 10)
 	{
 		data_mod1 = 0;
 
@@ -165,10 +166,6 @@ void Task_Init()
 	FDCAN_Init(&hfdcan2, Device_FDCAN2_Callback);
 	FDCAN_Init(&hfdcan3, Device_FDCAN3_Callback);
 
-    // UART初始化
-    UART_DMA_Receive_init(&huart1, buffer_receive_1, buffer_receive_length_1);//配置串口1接收VOFA+
-	UART_DMA_Receive_init(&huart7, buffer_receive_7, buffer_receive_length_7);//配置串口7接收陀螺仪
-	UART_DMA_Receive_init(&huart10, buffer_receive_10, buffer_receive_length_10);//配置串口10接收摄像头
 
     // 定时器初始化
     TIM_Init(&htim5, Task1ms_TIM5_Callback);
@@ -200,6 +197,13 @@ void Task_Init()
 
 	//初始化完成
     init_finished = true;
+
+	// UART初始化
+	UART_DMA_Receive_init(&huart1, buffer_receive_1, buffer_receive_length_1);//配置串口1接收VOFA+
+	UART_DMA_Receive_init(&huart7, buffer_receive_7, buffer_receive_length_7);//配置串口7接收陀螺仪
+	UART_DMA_Receive_init(&huart10, buffer_receive_10, buffer_receive_length_10);//配置串口10接收摄像头
+
+	HAL_GPIO_WritePin(GPIOE,GPIO_PIN_13,GPIO_PIN_SET);
     while (1)
     {
     	RoboticArm.Robotic_Main();
@@ -220,12 +224,10 @@ void Task_Init()
 		// tempFloat[0+6]=RoboticArm.arm_motor1.Get_Now_Angle()*180/PI;
 		// tempFloat[1+6]=RoboticArm.arm_motor1.Get_Now_Omega()*180/PI;
 		// tempFloat[2+6]=RoboticArm.arm_motor1.Get_Now_Torque();
-		tempFloat[3+3]=RoboticArm.arm_motor2.Get_Now_Angle()*180/PI;
-		tempFloat[4+3]=RoboticArm.arm_motor2.Get_Now_Omega()*180/PI;
-		tempFloat[5+3]=RoboticArm.arm_motor2.Get_Now_Torque();
-		tempFloat[3+6]=RoboticArm.arm_motor2.Get_Control_Angle()*180/PI;
-		tempFloat[4+6]=RoboticArm.arm_motor2.Get_Control_Omega()*180/PI;
-		tempFloat[5+6]=RoboticArm.arm_motor2.Get_Control_Torque();
+		tempFloat[6]=RoboticArm.arm_motor1.Get_Now_Angle()*180/PI;
+		tempFloat[7]=RoboticArm.arm_motor2.Get_Now_Angle()*180/PI;
+		tempFloat[8]=RoboticArm.arm_motor3.Get_Now_Angle()*180/PI;
+		tempFloat[9]=RoboticArm.arm_motor4.Get_Now_Angle()*180/PI;
 		// tempFloat[6+6]=RoboticArm.arm_motor3.Get_Now_Angle()*180/PI;
 		// tempFloat[7+6]=RoboticArm.arm_motor3.Get_Now_Omega()*180/PI;
 		// tempFloat[8+6]=RoboticArm.arm_motor3.Get_Now_Torque();
@@ -234,24 +236,25 @@ void Task_Init()
 		// tempFloat[6]=(RoboticArm.DH_arm_motor[3].Next_Angle-RoboticArm.DH_arm_motor[3].bias+IMUdata[0])*180/PI;
 
 		tempFloat[0+12]=IMUdata[0]*180/PI;
-		tempFloat[1+12]=IMUdata[1]*180/PI;
-		tempFloat[2+12]=IMUdata[2]*180/PI;
-		tempFloat[3+12]=IMUdata[3]*180/PI;
 
-		tempFloat[0+16]=Data_Visual_Receive.x;
-		tempFloat[1+16]=Data_Visual_Receive.y;
-		tempFloat[2+16]=Data_Visual_Receive.z;
+		tempFloat[0+13]=Vofa_Slider1;
+		tempFloat[1+13]=Vofa_Slider2;
+		tempFloat[2+13]=Vofa_Slider3;
 		// tempFloat[0+16]=RoboticArm.Intime_x;
 		// tempFloat[1+16]=RoboticArm.Intime_y;
 		// tempFloat[2+16]=RoboticArm.Intime_z;
-		Vofa_Transmit(&huart1,19);
-
+		Vofa_Transmit(&huart1,16);
     	// RoboticArm.DH_arm_motor[0].Next_Angle=Vofa_Slider1;
     	// RoboticArm.DH_arm_motor[1].Next_Angle=Vofa_Slider2;
     	// RoboticArm.DH_arm_motor[2].Next_Angle=Vofa_Slider3;
     	// RoboticArm.DH_arm_motor[0].Next_Omega=(0);
     	// RoboticArm.DH_arm_motor[1].Next_Omega=(0);
     	// RoboticArm.DH_arm_motor[2].Next_Omega=(0);
+
+    	// RoboticArm.Air_Pump(1);
+    	// HAL_Delay(2000);
+    	// RoboticArm.Air_Pump(0);
+    	// HAL_Delay(2000);
     }
 }
 

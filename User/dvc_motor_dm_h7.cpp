@@ -355,6 +355,14 @@ void Class_Motor_DM_Normal::Data_Process()
     Rx_Data.Control_Status = static_cast<Enum_Motor_DM_Control_Status_Normal>(tmp_buffer->Control_Status_Enum);
 
     // 计算圈数与总角度值
+    // 第一帧只记录，不计算圈数
+    if (First_Update_Flag == false)
+    {
+        Rx_Data.Pre_Encoder = tmp_encoder;
+        First_Update_Flag = true;
+    }
+
+    // 计算圈数与总角度值
     delta_encoder = tmp_encoder - Rx_Data.Pre_Encoder;
     if (delta_encoder < -(1 << 15))
     {

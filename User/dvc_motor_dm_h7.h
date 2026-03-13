@@ -278,6 +278,8 @@ protected:
     // 最大电流, 与上位机串口中上电打印电流保持一致
     float Current_Max;
 
+    bool First_Update_Flag=0;
+
     // 常量
 
     // 内部变量

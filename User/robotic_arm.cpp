@@ -55,79 +55,84 @@ inline float Angle_Normalization(float theta)
  */
 void Class_Robotic_arm::Init()
 {
-
 	// 成员变量初始化
-    arm_motor1.Init(&hfdcan1,0x04,0x01,Motor_DM_Control_Method_NORMAL_MIT,2*PI,30,10,0.95);
-	arm_motor2.Init(&hfdcan1,0x05,0x02,Motor_DM_Control_Method_NORMAL_MIT,2*PI,30,10,0.95);
-	arm_motor3.Init(&hfdcan1,0x06,0x03,Motor_DM_Control_Method_NORMAL_MIT,2*PI,30,10,0.95);
-	arm_motor4.Init(&hfdcan2,Motor_DJI_ID_0x201,Motor_DJI_Control_Method_ANGLE);
+    arm_motor1.Init(&hfdcan1,0x05,0x01,Motor_DM_Control_Method_NORMAL_MIT,12.5,10,28,0.9);
+	arm_motor2.Init(&hfdcan1,0x06,0x02,Motor_DM_Control_Method_NORMAL_MIT,12.5,10,28,1);
+	arm_motor3.Init(&hfdcan1,0x07,0x03,Motor_DM_Control_Method_NORMAL_MIT,12.5,10,28,0.9);
+	arm_motor4.Init(&hfdcan1,0x08,0x04,Motor_DM_Control_Method_NORMAL_MIT,12.5,10,28,0.8);
 	arm_motor1.FDCAN_Send_Enter();
 	arm_motor2.FDCAN_Send_Enter();
 	arm_motor3.FDCAN_Send_Enter();
+	arm_motor4.FDCAN_Send_Enter();
 	Robotic_Motor_Get();			//得到初始角度
 	HAL_Delay(500);
-
 	/*
 	 *		P: 空转效果1.5=1>0.5>2
-			D: 2左右就会震荡起飞
+	 *   	D: 2左右就会震荡起飞
 	 */
 	// PID参数初始化
 	arm_motor1.Set_K_D(1);
-	arm_motor1.Set_K_P(1.5);
+	arm_motor1.Set_K_P(5);
 	arm_motor2.Set_K_D(1);
-	arm_motor2.Set_K_P(1);
-	arm_motor3.Set_K_D(1);
-	arm_motor3.Set_K_P(1.5);
-	//arm_motor1.Set_Control_Torque(0.2);
-	arm_motor4.PID_Omega.Init(3.1f, 1.04f, 0.0f, 0.0f, 10.0f * PI, 16.0f * PI, 0.001f,0.01);
-	arm_motor4.PID_Angle.Init(5.0f, 0.0f, 0.0f, 0.0f, 10.0f * PI, 2.5f*PI, 0.001f,0.01);
-
+	arm_motor2.Set_K_P(25);
+	arm_motor3.Set_K_D(5);
+	arm_motor3.Set_K_P(50);
+	arm_motor4.Set_K_D(1);
+	arm_motor4.Set_K_P(5);
+	arm_motor3.Set_Control_Torque(5);
 	Init_Maxtrix();
 	Clear_Path_Planning();
 }
 
+/**
+ * @brief DH参数初始化
+ */
 void Class_Robotic_arm::Init_Maxtrix()
 {
 	// 转换矩阵初始化
 	DH_arm_motor[0].a=0.0f;
 	DH_arm_motor[0].d=0.0f;
 	DH_arm_motor[0].alpha=PI/2;
-	DH_arm_motor[0].Now_Angle=0.0f;
+	DH_arm_motor[0].Now_Angle=0;
 	DH_arm_motor[0].bias=0;
-	DH_arm_motor[0].MAX_Angle=PI*0.9f;
-	DH_arm_motor[0].MIN_Angle=-PI*0.9f;
+	DH_arm_motor[0].MAX_Angle=PI;
+	DH_arm_motor[0].MIN_Angle=0;
 	DH_arm_motor[0].Rotation=Reverse_Rotation;
-	DH_arm_motor[0].Reduction_Ratio=3.0;
+	DH_arm_motor[0].Reduction_Ratio=2.5;
+	DH_arm_motor[0].Next_Angle=0;
 
-	DH_arm_motor[1].a=0.390f;
+	DH_arm_motor[1].a=0.280f;
 	DH_arm_motor[1].d=0.0f;
 	DH_arm_motor[1].alpha=0;
-	DH_arm_motor[1].Now_Angle=0.0f;
-	DH_arm_motor[1].bias=0.2474f;
-	DH_arm_motor[1].MAX_Angle=PI*0.8f;
-	DH_arm_motor[1].MIN_Angle=0;
-	DH_arm_motor[1].Rotation=Reverse_Rotation;
-	DH_arm_motor[1].Reduction_Ratio=1.0;
+	DH_arm_motor[1].Now_Angle=89.0f/180.0f*PI;
+	DH_arm_motor[1].bias=0;
+	DH_arm_motor[1].MAX_Angle=90.0f/180.0f*PI;
+	DH_arm_motor[1].MIN_Angle=50.0f/180.0f*PI;
+	DH_arm_motor[1].Rotation=Forward_Rotation;
+	DH_arm_motor[1].Reduction_Ratio=2.0;
+	DH_arm_motor[1].Next_Angle=89.0f/180.0f*PI;
 
-	DH_arm_motor[2].a=0.360f;
+	DH_arm_motor[2].a=0.560f;
 	DH_arm_motor[2].d=0.0f;
 	DH_arm_motor[2].alpha=0.0f;
-	DH_arm_motor[2].Now_Angle=0.0f;
+	DH_arm_motor[2].Now_Angle=-45.0f/180.0f*PI;
 	DH_arm_motor[2].bias=0;
-	DH_arm_motor[2].MAX_Angle=PI*0.1f;
-	DH_arm_motor[2].MIN_Angle=-PI*0.8f;
-	DH_arm_motor[2].Rotation=Reverse_Rotation;
+	DH_arm_motor[2].MAX_Angle=0.0f;
+	DH_arm_motor[2].MIN_Angle=-PI*0.5f;
+	DH_arm_motor[2].Rotation=Forward_Rotation;
 	DH_arm_motor[2].Reduction_Ratio=1.0;
+	DH_arm_motor[2].Next_Angle=-45.0f/180.0f*PI;
 
 	DH_arm_motor[3].a=0.220f;//length
 	DH_arm_motor[3].d=0.0f;
 	DH_arm_motor[3].alpha=0.0f;
-	DH_arm_motor[3].Now_Angle=0.0f;
+	DH_arm_motor[3].Now_Angle=-90.0f/180.0f*PI;
 	DH_arm_motor[3].bias=0;
-	DH_arm_motor[3].MAX_Angle=PI*0.5f;
-	DH_arm_motor[3].MIN_Angle=-PI*0.5f;
+	DH_arm_motor[3].MAX_Angle=60.0f/180.0f*PI;
+	DH_arm_motor[3].MIN_Angle=-90.0f/180.0f*PI;
 	DH_arm_motor[3].Rotation=Forward_Rotation;
-	DH_arm_motor[3].Reduction_Ratio=2.0;
+	DH_arm_motor[3].Reduction_Ratio=1.0;
+	DH_arm_motor[3].Next_Angle=-90.0f/180.0f*PI;
 
 	robot_cal_T(&DH_arm_motor[0]);
 	robot_cal_T(&DH_arm_motor[1]);
@@ -260,6 +265,9 @@ Matrix4x4 Class_Robotic_arm::Calculate_kinematics_Inverse(float x, float y, floa
 	float a3=DH_arm_motor[2].a;	// 关节4参数
 	float a4=DH_arm_motor[3].a;	// 关节4参数
 	Matrix4x4 result;
+
+	z+=Suction_Distence; // 加上吸盘的高度
+
 	err_flag[0]=Kinematics_Inverse_Preprocessing(x,y,z);	//预处理判断特殊情况
 	err_flag[1]=err_flag[0];
 	if (err_flag[0]==1)			// 超范围，返回错误
@@ -377,8 +385,9 @@ Matrix4x4 Class_Robotic_arm::Calculate_kinematics_Inverse(float x, float y, floa
 	return result;
 }
 
-//theta2求解
-//此步骤可以得出s2和c2，故可确定唯一解theta2
+/**
+ * @brief theta2求解，此步骤可以得出s2和c2，故可确定唯一解theta2
+ */
 float Class_Robotic_arm::Cal_theta2(float theta3,float K1,float K2,float a2,float a3)
 {
 	float A,B;
@@ -825,6 +834,7 @@ uint8_t Class_Robotic_arm::Joint_Space_Preprocessing()
 				Joint_Space_Quintic_Cal_Via_Para(position[0][3], DH_arm_motor[j].Now_Angle, 0, 0,
 					Target_Angle_Matrix[0].Matrix[best_flag[0]][j], 0, 0, a_quintic[0][j],Order_Num[0]);	//计算参数
 			}
+			now_num=0;
 			return 1;
 		}
 	}
@@ -978,26 +988,26 @@ void Class_Robotic_arm::Robotic_Motor_Set()
 		arm_motor3.Set_Control_Angle(-(DH_arm_motor[2].Next_Angle-DH_arm_motor[2].bias)*DH_arm_motor[2].Reduction_Ratio);
 		arm_motor3.Set_Control_Omega(-(DH_arm_motor[2].Next_Omega)*DH_arm_motor[2].Reduction_Ratio);
 	}
-
 	if (DH_arm_motor[3].Rotation==Forward_Rotation)
 	{
-		arm_motor4.Set_Target_Angle((IMUdata[0])*DH_arm_motor[3].Reduction_Ratio);
-		// arm_motor4.Set_Target_Omega(1);
+		arm_motor4.Set_Control_Angle(-IMUdata[0]*DH_arm_motor[3].Reduction_Ratio*2);
+		arm_motor4.Set_Control_Omega(DH_arm_motor[3].Next_Omega*DH_arm_motor[3].Reduction_Ratio*2);
 	}
 	else
 	{
-		arm_motor4.Set_Target_Angle(-(IMUdata[0])*DH_arm_motor[3].Reduction_Ratio);
-		arm_motor4.Set_Target_Omega(-1);
+		arm_motor4.Set_Control_Angle(-(DH_arm_motor[3].Next_Angle-DH_arm_motor[3].bias)*DH_arm_motor[3].Reduction_Ratio+IMUdata[0]*DH_arm_motor[3].Reduction_Ratio);
+		// arm_motor4.Set_Control_Angle(-(DH_arm_motor[3].Next_Angle-DH_arm_motor[3].bias)*DH_arm_motor[3].Reduction_Ratio);
+		arm_motor4.Set_Control_Omega(-(DH_arm_motor[3].Next_Omega)*DH_arm_motor[3].Reduction_Ratio);
 	}
 	// if (DH_arm_motor[3].Rotation==Forward_Rotation)
 	// {
-	// 	arm_motor4.Set_Target_Angle((DH_arm_motor[3].Next_Angle-DH_arm_motor[3].bias+IMUdata[0])*DH_arm_motor[3].Reduction_Ratio);
-	// 	arm_motor4.Set_Target_Omega(DH_arm_motor[3].Next_Omega*DH_arm_motor[3].Reduction_Ratio);
+	// 	arm_motor4.Set_Control_Angle((DH_arm_motor[3].Next_Angle-DH_arm_motor[3].bias-IMUdata[0])*DH_arm_motor[3].Reduction_Ratio);
+	// 	arm_motor4.Set_Control_Omega(DH_arm_motor[3].Next_Omega*DH_arm_motor[3].Reduction_Ratio);
 	// }
 	// else
 	// {
-	// 	arm_motor4.Set_Target_Angle(-(DH_arm_motor[3].Next_Angle-DH_arm_motor[3].bias+IMUdata[0])*DH_arm_motor[3].Reduction_Ratio);
-	// 	arm_motor4.Set_Target_Omega(-(DH_arm_motor[3].Next_Omega)*DH_arm_motor[3].Reduction_Ratio);
+	// 	arm_motor4.Set_Control_Angle(-(DH_arm_motor[3].Next_Angle-DH_arm_motor[3].bias-IMUdata[0])*DH_arm_motor[3].Reduction_Ratio);
+	// 	arm_motor4.Set_Control_Omega(-(DH_arm_motor[3].Next_Omega)*DH_arm_motor[3].Reduction_Ratio);
 	// }
 }
 
@@ -1025,16 +1035,12 @@ void Class_Robotic_arm::Robotic_TIM_Send_PeriodElapsedCallback()
 {
 	//读取当前值并设置下一个时间间隔的值
 	Robotic_Motor_Get();
-	// Transmit_Visual_Transformation_Matrix(DH_arm_motor[0].Now_Angle,DH_arm_motor[1].Now_Angle,DH_arm_motor[2].Now_Angle,DH_arm_motor[3].Now_Angle);
-	//仅测试用
-	// Transmit_Visual_Transformation_Matrix(DH_arm_motor[0].Next_Angle,DH_arm_motor[1].Next_Angle,DH_arm_motor[2].Next_Angle,DH_arm_motor[3].Next_Angle);
 	Robotic_Motor_Set();
 	//电机PID计算
 	arm_motor1.TIM_Send_PeriodElapsedCallback();
 	arm_motor2.TIM_Send_PeriodElapsedCallback();
 	arm_motor3.TIM_Send_PeriodElapsedCallback();
-	arm_motor4.TIM_Calculate_PeriodElapsedCallback();	//arm_motor4 pid计算
-	TIM_1ms_FDCAN_PeriodElapsedCallback();				//arm_motor4 发送控制信息 CAN2的TIM定时器中断发送回调函数
+	arm_motor4.TIM_Send_PeriodElapsedCallback();	//arm_motor4 pid计算
 }
 
 /**
@@ -1161,7 +1167,7 @@ void Class_Robotic_arm::Single_Point_Planning_Mode_Handle_Main()
 		Intime_y=Vofa_Slider2;
 		Intime_z=Vofa_Slider3;
 		Intime_T=Vofa_Slider4;
-		if (Intime_T>0 && Intime_Joint_Space_Dynamic_Tuning(Intime_x,Intime_y,Intime_z,Intime_T,Facing_Forward,Fifth_Order)==1)//有效坐标
+		if (Intime_T>0 && Intime_Joint_Space_Dynamic_Tuning(Intime_x,Intime_y,Intime_z,Intime_T,Facing_Forward,Fifth_Order) == 1)//有效坐标
 		{
 			intime_path_finish_flag=0;
 		}
@@ -1228,3 +1234,16 @@ void Class_Robotic_arm::Robotic_Main()
 	//视觉规划模式在主函数中的程序
 	Visual_Planning_Mode_Handle_Main();
 }
+
+void Class_Robotic_arm::Air_Pump(uint8_t status)
+{
+	if (status == 0) //气泵关
+	{
+		HAL_GPIO_WritePin(GPIOE,GPIO_PIN_13,GPIO_PIN_RESET);
+	}
+	else if (status == 1) //气泵开
+	{
+		HAL_GPIO_WritePin(GPIOE,GPIO_PIN_13,GPIO_PIN_SET);
+	}
+}
+
