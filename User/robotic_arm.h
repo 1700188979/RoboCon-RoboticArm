@@ -127,19 +127,21 @@ public:
 
     void Visual_Planning_Mode_Handle_Main();
 
-    void Keep_Forearm_Horizontal();
-
     void Robotic_TIM_1ms_PeriodElapsedCallback();
 
     void Robotic_Main();
 
     void Air_Pump(uint8_t status);
 
+    void Keep_Forearm_Horizontal(uint8_t status);
+
     /*      从下至上为轴 1 2 3 4    */
     Class_Motor_DM_Normal arm_motor1;   //轴1 motor_DM_J4340
     Class_Motor_DM_Normal arm_motor2;   //轴2 motor_DM_J4310
     Class_Motor_DM_Normal arm_motor3;   //轴3 motor_DM_J4310
     Class_Motor_DM_Normal arm_motor4;   //轴4 motor_DJI_3508
+
+    Class_PID Horizontal_Controller;
 
     uint8_t path_finish_flag=1;
 
