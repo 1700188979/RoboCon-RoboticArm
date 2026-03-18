@@ -12,6 +12,8 @@
 #define POS_MAX_NUM 50                          // 路径规划中间点+终点最多20个点
 #define Turning_Acceleration 0.5f               // 转向时的角加速度绝对值0.5m/(s*s)
 #define Suction_Distence 0.60f                  // 吸盘高度
+#define Gravitational_Acceleration 9.81f
+#define mg_KFS 0.0f
 
 // 定义4x4矩阵结构体
 typedef struct {
@@ -48,6 +50,8 @@ typedef struct Transformation_Matrix_Para
     float alpha;
     float a;
     float d;
+    float m;
+    float p;
     float Now_Angle;
     float Now_Omega;
     float Now_Acceleration;
@@ -58,6 +62,8 @@ typedef struct Transformation_Matrix_Para
     float MAX_Angle;
     float MIN_Angle;
     float Reduction_Ratio;
+    float Torque;
+
     Matrix4x4 Matrix;
     Motor_Rotation_Adjust Rotation;
 }Transformation_Matrix_Para;
@@ -133,7 +139,7 @@ public:
 
     void Air_Pump(uint8_t status);
 
-    void Keep_Forearm_Horizontal(uint8_t status);
+    void Static_Equilibrium();
 
     /*      从下至上为轴 1 2 3 4    */
     Class_Motor_DM_Normal arm_motor1;   //轴1 motor_DM_J4340

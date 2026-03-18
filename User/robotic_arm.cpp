@@ -101,6 +101,9 @@ void Class_Robotic_arm::Init_Maxtrix()
 	DH_arm_motor[0].Rotation=Reverse_Rotation;
 	DH_arm_motor[0].Reduction_Ratio=2.5;
 	DH_arm_motor[0].Next_Angle=0;
+	DH_arm_motor[0].m=0.0f;
+	DH_arm_motor[0].p=0.0f;
+	DH_arm_motor[0].Torque=0.0f;
 
 	DH_arm_motor[1].a=0.280f;
 	DH_arm_motor[1].d=0.0f;
@@ -112,6 +115,9 @@ void Class_Robotic_arm::Init_Maxtrix()
 	DH_arm_motor[1].Rotation=Forward_Rotation;
 	DH_arm_motor[1].Reduction_Ratio=2.0;
 	DH_arm_motor[1].Next_Angle=65.0f/180.0f*PI;
+	DH_arm_motor[1].m=1.05f;
+	DH_arm_motor[1].p=0.220f;
+	DH_arm_motor[1].Torque=0.0f;
 
 	DH_arm_motor[2].a=0.560f;
 	DH_arm_motor[2].d=0.0f;
@@ -123,6 +129,9 @@ void Class_Robotic_arm::Init_Maxtrix()
 	DH_arm_motor[2].Rotation=Forward_Rotation;
 	DH_arm_motor[2].Reduction_Ratio=1.0;
 	DH_arm_motor[2].Next_Angle=-45.0f/180.0f*PI;
+	DH_arm_motor[2].m=0.6f;
+	DH_arm_motor[2].p=0.420f;
+	DH_arm_motor[2].Torque=0.0f;
 
 	DH_arm_motor[3].a=0.220f;//length
 	DH_arm_motor[3].d=0.0f;
@@ -134,6 +143,9 @@ void Class_Robotic_arm::Init_Maxtrix()
 	DH_arm_motor[3].Rotation=Reverse_Rotation;
 	DH_arm_motor[3].Reduction_Ratio=1.0;
 	DH_arm_motor[3].Next_Angle=-45.0f/180.0f*PI;
+	DH_arm_motor[3].m=0.65f;
+	DH_arm_motor[3].p=0.150f;
+	DH_arm_motor[3].Torque=0.0f;
 
 	robot_cal_T(&DH_arm_motor[0]);
 	robot_cal_T(&DH_arm_motor[1]);
@@ -955,7 +967,7 @@ void Class_Robotic_arm::Clear_Path_Planning()
 
 /**
  * @brief 设置下一个时间间隔的值
- * 路径规划下最短时间间隔的角度和角速度传递
+ * 路径规划下最短时间间隔的角度、角速度和力矩传递
  */
 void Class_Robotic_arm::Robotic_Motor_Set()
 {
@@ -964,56 +976,52 @@ void Class_Robotic_arm::Robotic_Motor_Set()
 	{
 		arm_motor1.Set_Control_Angle((DH_arm_motor[0].Next_Angle-DH_arm_motor[0].bias)*DH_arm_motor[0].Reduction_Ratio);
 		arm_motor1.Set_Control_Omega(DH_arm_motor[0].Next_Omega*DH_arm_motor[0].Reduction_Ratio);
+		arm_motor1.Set_Control_Torque(DH_arm_motor[0].Torque/DH_arm_motor[0].Reduction_Ratio);
 	}
 	else
 	{
 		arm_motor1.Set_Control_Angle(-(DH_arm_motor[0].Next_Angle-DH_arm_motor[0].bias)*DH_arm_motor[0].Reduction_Ratio);
-		arm_motor1.Set_Control_Omega(-(DH_arm_motor[0].Next_Omega)*DH_arm_motor[0].Reduction_Ratio);
+		arm_motor1.Set_Control_Omega(-DH_arm_motor[0].Next_Omega*DH_arm_motor[0].Reduction_Ratio);
+		arm_motor1.Set_Control_Torque(-DH_arm_motor[0].Torque/DH_arm_motor[0].Reduction_Ratio);
 	}
 
 	if (DH_arm_motor[1].Rotation==Forward_Rotation)
 	{
 		arm_motor2.Set_Control_Angle((DH_arm_motor[1].Next_Angle-DH_arm_motor[1].bias)*DH_arm_motor[1].Reduction_Ratio);
 		arm_motor2.Set_Control_Omega(DH_arm_motor[1].Next_Omega*DH_arm_motor[1].Reduction_Ratio);
+		arm_motor2.Set_Control_Torque(DH_arm_motor[1].Torque/DH_arm_motor[1].Reduction_Ratio);
 	}
 	else
 	{
 		arm_motor2.Set_Control_Angle(-(DH_arm_motor[1].Next_Angle-DH_arm_motor[1].bias)*DH_arm_motor[1].Reduction_Ratio);
-		arm_motor2.Set_Control_Omega(-(DH_arm_motor[1].Next_Omega)*DH_arm_motor[1].Reduction_Ratio);
+		arm_motor2.Set_Control_Omega(-DH_arm_motor[1].Next_Omega*DH_arm_motor[1].Reduction_Ratio);
+		arm_motor2.Set_Control_Torque(-DH_arm_motor[1].Torque/DH_arm_motor[1].Reduction_Ratio);
 	}
 
 	if (DH_arm_motor[2].Rotation==Forward_Rotation)
 	{
 		arm_motor3.Set_Control_Angle((DH_arm_motor[2].Next_Angle-DH_arm_motor[2].bias)*DH_arm_motor[2].Reduction_Ratio);
 		arm_motor3.Set_Control_Omega(DH_arm_motor[2].Next_Omega*DH_arm_motor[2].Reduction_Ratio);
+		arm_motor3.Set_Control_Torque(DH_arm_motor[2].Torque/DH_arm_motor[2].Reduction_Ratio);
 	}
 	else
 	{
 		arm_motor3.Set_Control_Angle(-(DH_arm_motor[2].Next_Angle-DH_arm_motor[2].bias)*DH_arm_motor[2].Reduction_Ratio);
-		arm_motor3.Set_Control_Omega(-(DH_arm_motor[2].Next_Omega)*DH_arm_motor[2].Reduction_Ratio);
+		arm_motor3.Set_Control_Omega(-DH_arm_motor[2].Next_Omega*DH_arm_motor[2].Reduction_Ratio);
+		arm_motor3.Set_Control_Torque(-DH_arm_motor[2].Torque/DH_arm_motor[2].Reduction_Ratio);
 	}
 	if (DH_arm_motor[3].Rotation==Forward_Rotation)
 	{
 		arm_motor4.Set_Control_Omega(-Horizontal_Controller.Get_Out());
 		arm_motor4.Set_Control_Angle(0);
+		arm_motor4.Set_Control_Torque(DH_arm_motor[3].Torque/DH_arm_motor[3].Reduction_Ratio);
 	}
 	else
 	{
 		arm_motor4.Set_Control_Omega(Horizontal_Controller.Get_Out());
 		arm_motor4.Set_Control_Angle(0);
-
+		arm_motor4.Set_Control_Torque(-DH_arm_motor[3].Torque/DH_arm_motor[3].Reduction_Ratio);
 	}
-	// if (DH_arm_motor[3].Rotation==Forward_Rotation)
-	// {
-	// 	arm_motor4.Set_Control_Angle(-IMUdata[0]*DH_arm_motor[3].Reduction_Ratio*2);
-	// 	arm_motor4.Set_Control_Omega(DH_arm_motor[3].Next_Omega*DH_arm_motor[3].Reduction_Ratio);
-	// }
-	// else
-	// {
-	// 	arm_motor4.Set_Control_Angle(-(DH_arm_motor[3].Next_Angle-DH_arm_motor[3].bias)*DH_arm_motor[3].Reduction_Ratio+IMUdata[0]*DH_arm_motor[3].Reduction_Ratio);
-	// 	// arm_motor4.Set_Control_Angle(-(DH_arm_motor[3].Next_Angle-DH_arm_motor[3].bias)*DH_arm_motor[3].Reduction_Ratio);
-	// 	arm_motor4.Set_Control_Omega(-(DH_arm_motor[3].Next_Omega)*DH_arm_motor[3].Reduction_Ratio);
-	// }
 }
 
 /**
@@ -1221,6 +1229,8 @@ void Class_Robotic_arm::Robotic_TIM_1ms_PeriodElapsedCallback()
 	//末端水平控制PID计算
 	Horizontal_Controller.Set_Now(IMUdata[0]);
 	Horizontal_Controller.TIM_Calculate_PeriodElapsedCallback();
+	//静力平衡前馈力矩计算
+	Static_Equilibrium();
 	//电机PID计算
 	Robotic_TIM_Send_PeriodElapsedCallback();
 }
@@ -1248,7 +1258,36 @@ void Class_Robotic_arm::Air_Pump(uint8_t status)
 	}
 }
 
-void Class_Robotic_arm::Keep_Forearm_Horizontal(uint8_t status)
+void Class_Robotic_arm::Static_Equilibrium()
 {
+	float a2=DH_arm_motor[1].a;	// 关节3参数
+	float a3=DH_arm_motor[2].a;	// 关节4参数
+	float a4=DH_arm_motor[3].a;	// 关节4参数
 
+	float m2=DH_arm_motor[1].m;	// 关节3参数
+	float m3=DH_arm_motor[2].m;	// 关节4参数
+	float m4=DH_arm_motor[3].m;	// 关节4参数
+
+	float p2=DH_arm_motor[1].p;	// 关节3参数
+	float p3=DH_arm_motor[2].p;	// 关节4参数
+	float p4=DH_arm_motor[3].p;	// 关节4参数
+
+	float s2  = sinf(DH_arm_motor[2].Next_Angle);
+	float s23 = sinf(DH_arm_motor[2].Next_Angle+DH_arm_motor[3].Next_Angle);
+
+	// 末端力产生力矩
+	float t2 = mg_KFS * ( a2*s2 + a3*s23 );
+	float t3 = mg_KFS * a3 * s23;
+	float t4 = mg_KFS * a4;
+
+	// 重力矩
+	float G2 = Gravitational_Acceleration * ( m2*p2*s2 + m3*(a2*s2 + p3*s23) + m4*(a2*s2 + a3*s23) );
+	float G3 = Gravitational_Acceleration * ( m3*p3*s23 + m4*a3*s23 );
+	float G4 = Gravitational_Acceleration * m4 * p4;
+
+	// 总力矩
+	DH_arm_motor[0].Torque = 0;
+	DH_arm_motor[1].Torque = t2 + G2;
+	DH_arm_motor[2].Torque = t3 + G3;
+	DH_arm_motor[3].Torque = t4 + G4;
 }
