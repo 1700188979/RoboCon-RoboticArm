@@ -167,7 +167,8 @@ static void UART1_Receive_Serve(uint8_t *buffer, uint8_t length)
 // }
 //UART7中断接收函数
 static void UART7_Receive_Serve(uint8_t *buffer, uint8_t length)
-{//DMA要开circle模式
+{
+    //DMA要开circle模式
     IMU_get_measer(buffer,length);
 }
 //UART8中断接收函数
@@ -184,7 +185,8 @@ static void UART7_Receive_Serve(uint8_t *buffer, uint8_t length)
 // }
 //UART10中断接收函数
 static void UART10_Receive_Serve(uint8_t *buffer, uint8_t length)
-{//DMA无需开circle模式
+{
+    //DMA无需开circle模式
     if (VS_Receive_flag==0)
     {
         Visual_Get_Convert(buffer,length);

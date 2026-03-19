@@ -25,9 +25,9 @@ extern float tempFloat[25];
 
 /*需要的的按键则取消注释，不需要用的则注释掉*/
 
-// #define UseVOFAButton1
-//#define UseVOFAButton2
-//#define UseVOFAButton3
+#define UseVOFAButton1
+#define UseVOFAButton2
+#define UseVOFAButton3
 //#define UseVOFAButton4
 //#define UseVOFAButton5
 //#define UseVOFAButton6
@@ -74,10 +74,10 @@ extern float tempFloat[25];
 #define Vofa_Button1 VofaData[7]
 #endif
 #ifdef UseVOFAButton2
-#define Vofa_Button2
+#define Vofa_Button2 VofaData[8]
 #endif
 #ifdef UseVOFAButton3
-#define Vofa_Button3
+#define Vofa_Button3 VofaData[9]
 #endif
 #ifdef UseVOFAButton4
 #define Vofa_Button4

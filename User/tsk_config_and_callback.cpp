@@ -179,6 +179,10 @@ void Task_Init()
 	//机械臂初始化
 	RoboticArm.Init();
 
+	HAL_Delay(1000);
+
+	RoboticArm.Robotic_Motor_Get();
+
 	//预设的动作
 	// /* 吸取···高度 1 */
 	// RoboticArm.Set_Target_point(0.85,0.01,0.07,5,Facing_Forward,Fifth_Order);		//点0
@@ -199,7 +203,7 @@ void Task_Init()
 	UART_DMA_Receive_init(&huart7, buffer_receive_7, buffer_receive_length_7);//配置串口7接收陀螺仪
 	UART_DMA_Receive_init(&huart10, buffer_receive_10, buffer_receive_length_10);//配置串口10接收摄像头
 
-	HAL_Delay(5000);
+	HAL_Delay(4000);//陀螺仪上电5s
 	//初始化完成
 	init_finished = true;
 	HAL_GPIO_WritePin(GPIOE,GPIO_PIN_13,GPIO_PIN_SET);
@@ -213,10 +217,10 @@ void Task_Init()
 		tempFloat[3]=RoboticArm.DH_arm_motor[1].Next_Omega*180/PI;
 		tempFloat[4]=RoboticArm.DH_arm_motor[2].Next_Angle*180/PI;
 		tempFloat[5]=RoboticArm.DH_arm_motor[2].Next_Omega*180/PI;
-		tempFloat[6]=RoboticArm.arm_motor1.Get_Now_Angle()*180/PI;
-		tempFloat[7]=RoboticArm.arm_motor2.Get_Now_Angle()*180/PI/2;
-		tempFloat[8]=RoboticArm.arm_motor3.Get_Now_Angle()*180/PI;
-    	tempFloat[9]=RoboticArm.arm_motor4.Get_Now_Angle()*180/PI;
+		tempFloat[6]=RoboticArm.DH_arm_motor[0].Now_Angle*180/PI;
+		tempFloat[7]=RoboticArm.DH_arm_motor[1].Now_Angle*180/PI;
+		tempFloat[8]=RoboticArm.DH_arm_motor[2].Now_Angle*180/PI;
+    	tempFloat[9]=RoboticArm.DH_arm_motor[3].Now_Angle*180/PI;
     	tempFloat[10]=-RoboticArm.Horizontal_Controller.Get_Out();
     	tempFloat[11]=RoboticArm.arm_motor4.Get_Now_Omega();
 		tempFloat[12]=IMUdata[0]*180/PI;

@@ -1030,15 +1030,15 @@ void Class_Robotic_arm::Robotic_Motor_Set()
 void Class_Robotic_arm::Robotic_Motor_Get()
 {
 	//角度
-	DH_arm_motor[0].Now_Angle=arm_motor1.Get_Now_Angle()/DH_arm_motor[0].Reduction_Ratio+DH_arm_motor[0].bias;
+	DH_arm_motor[0].Now_Angle=-arm_motor1.Get_Now_Angle()/DH_arm_motor[0].Reduction_Ratio+DH_arm_motor[0].bias;
 	DH_arm_motor[1].Now_Angle=arm_motor2.Get_Now_Angle()/DH_arm_motor[1].Reduction_Ratio+DH_arm_motor[1].bias;
 	DH_arm_motor[2].Now_Angle=arm_motor3.Get_Now_Angle()/DH_arm_motor[2].Reduction_Ratio+DH_arm_motor[2].bias;
-	DH_arm_motor[3].Now_Angle=arm_motor4.Get_Now_Angle()/DH_arm_motor[3].Reduction_Ratio+DH_arm_motor[3].bias;
+	DH_arm_motor[3].Now_Angle=-arm_motor4.Get_Now_Angle()/DH_arm_motor[3].Reduction_Ratio+DH_arm_motor[3].bias;
 	//角速度
-	DH_arm_motor[0].Now_Omega=arm_motor1.Get_Now_Omega()/DH_arm_motor[0].Reduction_Ratio;
+	DH_arm_motor[0].Now_Omega=-arm_motor1.Get_Now_Omega()/DH_arm_motor[0].Reduction_Ratio;
 	DH_arm_motor[1].Now_Omega=arm_motor2.Get_Now_Omega()/DH_arm_motor[1].Reduction_Ratio;
 	DH_arm_motor[2].Now_Omega=arm_motor3.Get_Now_Omega()/DH_arm_motor[2].Reduction_Ratio;
-	DH_arm_motor[3].Now_Omega=arm_motor4.Get_Now_Omega()/DH_arm_motor[3].Reduction_Ratio;
+	DH_arm_motor[3].Now_Omega=-arm_motor4.Get_Now_Omega()/DH_arm_motor[3].Reduction_Ratio;
 }
 
 /**
@@ -1230,7 +1230,7 @@ void Class_Robotic_arm::Robotic_TIM_1ms_PeriodElapsedCallback()
 	Horizontal_Controller.Set_Now(IMUdata[0]);
 	Horizontal_Controller.TIM_Calculate_PeriodElapsedCallback();
 	//静力平衡前馈力矩计算
-	Static_Equilibrium();
+	// Static_Equilibrium();
 	//电机PID计算
 	Robotic_TIM_Send_PeriodElapsedCallback();
 }
@@ -1240,12 +1240,17 @@ void Class_Robotic_arm::Robotic_TIM_1ms_PeriodElapsedCallback()
  */
 void Class_Robotic_arm::Robotic_Main()
 {
+	//多点规划模式在主函数中的程序
+	Robotic_Button_Function();
 	//单点规划模式在主函数中的程序
 	Single_Point_Planning_Mode_Handle_Main();
 	//视觉规划模式在主函数中的程序
 	Visual_Planning_Mode_Handle_Main();
 }
 
+/*
+ * @brief 控制气泵开关
+ */
 void Class_Robotic_arm::Air_Pump(uint8_t status)
 {
 	if (status == 0) //气泵关
@@ -1258,6 +1263,9 @@ void Class_Robotic_arm::Air_Pump(uint8_t status)
 	}
 }
 
+/*
+ * @brief 计算机械臂各个电机的力矩
+ */
 void Class_Robotic_arm::Static_Equilibrium()
 {
 	float a2=DH_arm_motor[1].a;	// 关节3参数
@@ -1290,4 +1298,103 @@ void Class_Robotic_arm::Static_Equilibrium()
 	DH_arm_motor[1].Torque = t2 + G2;
 	DH_arm_motor[2].Torque = t3 + G3;
 	DH_arm_motor[3].Torque = t4 + G4;
+}
+
+/*
+ * @brief 外界按键扫描，按下按键代表实现对应功能
+ */
+void Class_Robotic_arm::Robotic_Button_Scan()
+{
+	// 按键 1
+	if (Vofa_Button1 == 1)
+	{
+		// HAL_Delay(10);		// 延时10ms消抖
+		// if (Vofa_Button1 == 1)
+		// {
+		// 	while (Vofa_Button1);   // 松手检测
+			KEYNUM = 1;
+			Vofa_Button1 = 0;
+		// }
+	}
+
+	// 按键 2
+	else if (Vofa_Button2 == 1)
+	{
+		// HAL_Delay(10);		// 延时10ms消抖
+		// if (Vofa_Button2 == 1)
+		// {
+		// 	while (Vofa_Button2);   // 松手检测
+			KEYNUM = 2;
+			Vofa_Button2 = 0;
+		// }
+	}
+
+	// 按键 3
+	else if (Vofa_Button3 == 1)
+	{
+		// HAL_Delay(10);		// 延时10ms消抖
+		// if (Vofa_Button3 == 1)
+		// {
+		// 	while (Vofa_Button3);   // 松手检测
+			KEYNUM = 3;
+			Vofa_Button3 = 0;
+		// }
+	}
+
+	// 无按键按下
+	else
+	{
+		KEYNUM = 0;
+	}
+}
+
+/*
+ * @brief 功能实现函数
+ */
+void Class_Robotic_arm::Robotic_Button_Function()
+{
+	if (path_finish_flag==0 || intime_path_finish_flag==0)
+	{
+		return;
+	}
+
+	Robotic_Button_Scan();
+
+	if (KEYNUM==0)
+	{
+		return;
+	}
+
+	if (KEYNUM==1)
+	{
+		/* 吸取···高度 1 */
+		Set_Target_point(0.85,0.01,0.07,5,Facing_Forward,Fifth_Order);			// 目标KFS位置
+		Set_Target_point(-0.03,0.341,0.83,5,Facing_Forward,Fifth_Order);		// 回收位置
+	}
+
+	else if (KEYNUM==2)
+	{
+		/* 吸取···高度 2 */
+		Set_Target_point(0.85,0.01,0.27,5,Facing_Forward,Fifth_Order);			// 目标KFS位置
+		Set_Target_point(-0.03,0.341,0.83,5,Facing_Forward,Fifth_Order);		// 回收位置
+	}
+
+	else if (KEYNUM==3)
+	{
+		/* 吸取···高度 3 */
+		Set_Target_point(0.85,0.01,0.47,5,Facing_Forward,Fifth_Order);			// 目标KFS位置
+		Set_Target_point(-0.03,0.341,0.83,5,Facing_Forward,Fifth_Order);		// 回收位置
+	}
+
+	else
+	{
+		return;
+	}
+
+	KEYNUM=0;
+
+	if (Joint_Space_Preprocessing()==1)
+	{
+		path_finish_flag=0;
+	}
 }

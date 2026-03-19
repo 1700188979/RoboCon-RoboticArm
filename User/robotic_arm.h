@@ -141,6 +141,10 @@ public:
 
     void Static_Equilibrium();
 
+    void Robotic_Button_Scan();
+
+    void Robotic_Button_Function();
+
     /*      从下至上为轴 1 2 3 4    */
     Class_Motor_DM_Normal arm_motor1;   //轴1 motor_DM_J4340
     Class_Motor_DM_Normal arm_motor2;   //轴2 motor_DM_J4310
@@ -178,6 +182,7 @@ public:
 
     uint8_t intime_path_finish_flag=1; //即时处理标志
 
+    uint8_t KEYNUM=0;
 };
 
 Matrix4x4 matrix_multiply(Matrix4x4 T1, Matrix4x4 T2);
