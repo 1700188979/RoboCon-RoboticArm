@@ -191,8 +191,8 @@ void Task_Init()
 	// RoboticArm.Set_Target_point(0.85,0.01,0.27,5,Facing_Forward,Fifth_Order);		//点0
 	// RoboticArm.Set_Target_point(-0.03,0.341,0.83,5,Facing_Forward,Fifth_Order);		//点0
 	// /* 吸取···高度 3 */
-	RoboticArm.Set_Target_point(0.85,0.01,0.47,5,Facing_Forward,Fifth_Order);		//点0
-	RoboticArm.Set_Target_point(-0.03,0.341,0.83,5,Facing_Forward,Fifth_Order);		//点0
+	// RoboticArm.Set_Target_point(0.85,0.01,0.47,5,Facing_Forward,Fifth_Order);		//点0
+	RoboticArm.Set_Target_point(-0.01,0.33,0.83,3,Facing_Forward,Fifth_Order);		//点0
 	if (RoboticArm.Joint_Space_Preprocessing()==1)
 	{
 		RoboticArm.path_finish_flag=0;
@@ -223,7 +223,8 @@ void Task_Init()
     	tempFloat[9]=RoboticArm.DH_arm_motor[3].Now_Angle*180/PI;
     	tempFloat[10]=-RoboticArm.Horizontal_Controller.Get_Out();
     	tempFloat[11]=RoboticArm.arm_motor4.Get_Now_Omega();
-		tempFloat[12]=IMUdata[0]*180/PI;
+		tempFloat[12]=IMUdata[1]*180/PI-2;
+
 		tempFloat[13]=Vofa_Slider1;
 		tempFloat[14]=Vofa_Slider2;
 		tempFloat[15]=Vofa_Slider3;

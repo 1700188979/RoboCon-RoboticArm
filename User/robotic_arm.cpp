@@ -110,7 +110,7 @@ void Class_Robotic_arm::Init_Maxtrix()
 	DH_arm_motor[1].alpha=0;
 	DH_arm_motor[1].Now_Angle=65.0f/180.0f*PI;
 	DH_arm_motor[1].bias=0;
-	DH_arm_motor[1].MAX_Angle=90.0f/180.0f*PI;
+	DH_arm_motor[1].MAX_Angle=100.0f/180.0f*PI;
 	DH_arm_motor[1].MIN_Angle=50.0f/180.0f*PI;
 	DH_arm_motor[1].Rotation=Forward_Rotation;
 	DH_arm_motor[1].Reduction_Ratio=2.0;
@@ -1227,11 +1227,11 @@ void Class_Robotic_arm::Robotic_TIM_1ms_PeriodElapsedCallback()
 	//视觉规划模式（即时）
 	Visual_Planning_Mode();
 	//末端水平控制PID计算
-	Horizontal_Controller.Set_Now(IMUdata[0]);
+	Horizontal_Controller.Set_Now(-(IMUdata[1]-0.0349));
 	Horizontal_Controller.TIM_Calculate_PeriodElapsedCallback();
 	//静力平衡前馈力矩计算
 	// Static_Equilibrium();
-	//电机PID计算
+	//电机PID计算+
 	Robotic_TIM_Send_PeriodElapsedCallback();
 }
 
@@ -1368,22 +1368,25 @@ void Class_Robotic_arm::Robotic_Button_Function()
 	if (KEYNUM==1)
 	{
 		/* 吸取···高度 1 */
-		Set_Target_point(0.85,0.01,0.07,5,Facing_Forward,Fifth_Order);			// 目标KFS位置
-		Set_Target_point(-0.03,0.341,0.83,5,Facing_Forward,Fifth_Order);		// 回收位置
+		Set_Target_point(0.8,0.01,0.38,3,Facing_Forward,Third_Order);			// 目标KFS上方
+		Set_Target_point(0.85,0.01,0.17,1,Facing_Forward,Fifth_Order);			// 目标KFS位置
+		Set_Target_point(-0.01,0.341,0.83,5,Facing_Forward,Fifth_Order);		// 回收位置
 	}
 
 	else if (KEYNUM==2)
 	{
 		/* 吸取···高度 2 */
-		Set_Target_point(0.85,0.01,0.27,5,Facing_Forward,Fifth_Order);			// 目标KFS位置
-		Set_Target_point(-0.03,0.341,0.83,5,Facing_Forward,Fifth_Order);		// 回收位置
+		Set_Target_point(0.8,0.01,0.48,3,Facing_Forward,Third_Order);			// 目标KFS上方
+		Set_Target_point(0.85,0.01,0.34,1,Facing_Forward,Fifth_Order);			// 目标KFS位置
+		Set_Target_point(-0.01,0.27,0.83,5,Facing_Forward,Fifth_Order);		// 回收位置
 	}
 
 	else if (KEYNUM==3)
 	{
 		/* 吸取···高度 3 */
-		Set_Target_point(0.85,0.01,0.47,5,Facing_Forward,Fifth_Order);			// 目标KFS位置
-		Set_Target_point(-0.03,0.341,0.83,5,Facing_Forward,Fifth_Order);		// 回收位置
+		Set_Target_point(0.8,0.01,0.58,3,Facing_Forward,Third_Order);			// 目标KFS上方
+		Set_Target_point(0.85,0.01,0.53,1,Facing_Forward,Fifth_Order);			// 目标KFS位置
+		Set_Target_point(-0.01,0.341,0.83,5,Facing_Forward,Fifth_Order);		// 回收位置
 	}
 
 	else
@@ -1398,3 +1401,6 @@ void Class_Robotic_arm::Robotic_Button_Function()
 		path_finish_flag=0;
 	}
 }
+
+
+
