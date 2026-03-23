@@ -6,7 +6,6 @@
 
 // 添加 .cpp 的头文件（通常放置在此处）
 #include "drv_tim_h7.h"
-#include "dvc_motor_dji_h7.h"
 #include "dvc_motor_dm_h7.h"
 #include "drv_fdcan_h7.h"
 
@@ -64,7 +63,6 @@ void Class_Robotic_arm::Init()
 	arm_motor2.FDCAN_Send_Enter();
 	arm_motor3.FDCAN_Send_Enter();
 	arm_motor4.FDCAN_Send_Enter();
-	Robotic_Motor_Get();			//得到初始角度
 	HAL_Delay(200);
 	/* PID参数初始化 */
 	arm_motor1.Set_K_D(1);
@@ -76,6 +74,8 @@ void Class_Robotic_arm::Init()
 	arm_motor4.Set_K_D(1);
 	arm_motor4.Set_K_P(0);
 	arm_motor3.Set_Control_Torque(10);
+
+	Robotic_Motor_Get();			//得到初始角度
 
 	//末端水平控制器
 	Horizontal_Controller.Init(35,18,0,0,0,5 );
@@ -924,7 +924,7 @@ void Class_Robotic_arm::Set_Target_point(float x, float y, float z, float t, Pos
 }
 
 /**
- * @brief 设置目标点
+ * @brief 清理目标点
  */
 void Class_Robotic_arm::Clear_Path_Planning()
 {
@@ -1044,7 +1044,7 @@ void Class_Robotic_arm::Robotic_Motor_Get()
 /**
  * @brief 机械臂4电机的PID计算
  */
-void Class_Robotic_arm::Robotic_TIM_Send_PeriodElapsedCallback()
+void Class_Robotic_arm::Robotic_Arm_TIM_Send_PeriodElapsedCallback()
 {
 	//读取当前值并设置下一个时间间隔的值
 	Robotic_Motor_Get();
@@ -1232,7 +1232,7 @@ void Class_Robotic_arm::Robotic_TIM_1ms_PeriodElapsedCallback()
 	//静力平衡前馈力矩计算
 	// Static_Equilibrium();
 	//电机PID计算+
-	Robotic_TIM_Send_PeriodElapsedCallback();
+	Robotic_Arm_TIM_Send_PeriodElapsedCallback();
 }
 
 /*

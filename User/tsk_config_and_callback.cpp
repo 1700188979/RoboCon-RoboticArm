@@ -14,6 +14,7 @@
 #include "drv_fdcan_h7.h"
 #include "dvc_vesc_h7.h"
 #include "robotic_arm.h"
+#include "robotic_recycling.h"
 
 // .C file:
 extern "C" {              // 使用 C 语言链接方式
@@ -26,10 +27,15 @@ extern "C" {              // 使用 C 语言链接方式
 #include "deta10.h"
 #include "visual_interact.h"
 }
+
 // 全局初始化完成标志位
 bool init_finished = false;
+
 // 机械臂类
 Class_Robotic_arm RoboticArm;
+
+// 运输装置类
+Class_Robotic_Recycling RoboticRecycling;
 
 /**
  * @brief FDCAN1 回调函数
@@ -86,9 +92,18 @@ void Device_FDCAN2_Callback(Struct_FDCAN_Rx_Buffer *FDCAN_RxMessage)
 	// FDCAN: 标准帧 = FDCAN_STANDARD_ID，扩展帧 = FDCAN_EXTENDED_ID
 	if (FDCAN_RxMessage->Header.IdType == FDCAN_STANDARD_ID)//判断是否为标准帧 —— RM2006/3508/6020,DM电机
 	{
-
 		switch (FDCAN_RxMessage->Header.Identifier)
 		{
+			case (0x201):
+			{
+				RoboticRecycling.recycling_motor_elevator.Motor.FDCAN_RxCpltCallback(FDCAN_RxMessage->Data);
+				break;
+			}
+			case (0x202):
+			{
+				RoboticRecycling.recycling_motor_transport.Motor.FDCAN_RxCpltCallback(FDCAN_RxMessage->Data);
+				break;
+			}
 			default:
 				break;
 		}
