@@ -132,7 +132,7 @@ public:
 
     void Visual_Planning_Mode_Handle_Main();
 
-    void Robotic_TIM_1ms_PeriodElapsedCallback();
+    void Robotic_Arm_TIM_10ms_PeriodElapsedCallback();
 
     void Robotic_Main();
 

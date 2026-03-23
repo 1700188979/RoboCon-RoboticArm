@@ -50,6 +50,8 @@ typedef struct Robotic_Recycling_Motor_Type
 
     float Next_Acceleration = 0;
 
+    uint8_t path_finish_flag = 1;
+
 }Robotic_Recycling_Motor_Type;
 
 class Class_Robotic_Recycling
@@ -69,9 +71,12 @@ public:
 
     void Joint_Space_Via_Path_Planning(Robotic_Recycling_Motor_Type Type);
 
-    void Robotic_Recycling_TIM_Send_PeriodElapsedCallback();
+    void Joint_Space_Path_Planning(Robotic_Recycling_Motor_Type Type);
+
+    void Robotic_Recycling_TIM_10ms_PeriodElapsedCallback();
 
     Robotic_Recycling_Motor_Type recycling_motor_elevator;      // 控制升降
+
     Robotic_Recycling_Motor_Type recycling_motor_transport;     // 控制运输
 
 

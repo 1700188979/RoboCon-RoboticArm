@@ -165,7 +165,9 @@ void Task1ms_TIM5_Callback()
 	{
 		data_mod1 = 0;
 
-		RoboticArm.Robotic_TIM_1ms_PeriodElapsedCallback();
+		RoboticArm.Robotic_Arm_TIM_10ms_PeriodElapsedCallback();
+
+		RoboticRecycling.Robotic_Recycling_TIM_10ms_PeriodElapsedCallback();
 	}
 }
 /**

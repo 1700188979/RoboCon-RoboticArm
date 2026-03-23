@@ -117,6 +117,7 @@ void Class_Robotic_Recycling::Joint_Space_Quintic_Cal_Via_Para(float T,float the
 inline void Class_Robotic_Recycling::Joint_Space_Preprocessing(Robotic_Recycling_Motor_Type Type)
 {
 	Joint_Space_Quintic_Cal_Via_Para(Type.T,Type.Motor.Get_Now_Angle(),Type.Targrt_Angle,Type.Order_OF,Type.a_quintic);
+	Type.path_finish_flag=0;
 }
 
 /**
@@ -140,10 +141,44 @@ void Class_Robotic_Recycling::Joint_Space_Via_Path_Planning(Robotic_Recycling_Mo
 }
 
 /**
+ * @brief 传递当前
+ * @param FunTimes:已经过的时间单位个数 由定时器计数输入（从1到N）
+ */
+void Class_Robotic_Recycling::Joint_Space_Path_Planning(Robotic_Recycling_Motor_Type Type)
+{
+	if (Type.FunTimes<=Type.N)
+	{
+		Joint_Space_Via_Path_Planning(Type);
+	}
+	else
+	{
+		Type.FunTimes=0;
+		Type.path_finish_flag=1;
+		Clear_Path_Planning(Type);
+	}
+}
+
+
+
+/**
  * @brief 该机构两个电机的PID计算
  */
-void Class_Robotic_Recycling::Robotic_Recycling_TIM_Send_PeriodElapsedCallback()
+void Class_Robotic_Recycling::Robotic_Recycling_TIM_10ms_PeriodElapsedCallback()
 {
+	if (recycling_motor_elevator.path_finish_flag==0)
+	{
+		recycling_motor_elevator.FunTimes++;
+		//路径规划计算
+		Joint_Space_Path_Planning(recycling_motor_elevator);
+	}
+
+	if (recycling_motor_transport.path_finish_flag==0)
+	{
+		recycling_motor_transport.FunTimes++;
+		//路径规划计算
+		Joint_Space_Path_Planning(recycling_motor_transport);
+	}
+
 	recycling_motor_elevator.Motor.Set_Target_Omega(recycling_motor_elevator.Next_Omega);
 	recycling_motor_elevator.Motor.Set_Target_Angle(recycling_motor_elevator.Next_Angle);
 	recycling_motor_elevator.Motor.TIM_Calculate_PeriodElapsedCallback();

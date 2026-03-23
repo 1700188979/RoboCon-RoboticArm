@@ -5,6 +5,7 @@
 #include "robotic_arm.h"
 
 // 添加 .cpp 的头文件（通常放置在此处）
+#include "robotic_recycling.h"
 #include "drv_tim_h7.h"
 #include "dvc_motor_dm_h7.h"
 #include "drv_fdcan_h7.h"
@@ -1218,7 +1219,7 @@ void Class_Robotic_arm::Visual_Planning_Mode_Handle_Main()
 /*
  * @brief 机械臂类定义的外部接口函数，便于整合部件时被调用使用，定时器1ms调用一次
  */
-void Class_Robotic_arm::Robotic_TIM_1ms_PeriodElapsedCallback()
+void Class_Robotic_arm::Robotic_Arm_TIM_10ms_PeriodElapsedCallback()
 {
 	//多点规划模式
 	Multi_Point_Planning_Mode();
