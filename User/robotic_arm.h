@@ -5,6 +5,7 @@
 #ifndef ROBOTIC_ARM_H
 #define ROBOTIC_ARM_H
 
+#include "dvc_motor_dji_h7.h"
 #include "dvc_motor_dm_h7.h"
 
 #define Shortest_Interval 0.01f                // 两点之间最小时间间隔1ms
@@ -115,7 +116,7 @@ public:
 
     void Robotic_Motor_Set();
 
-    void Robotic_Arm_TIM_Send_PeriodElapsedCallback();
+    void Robotic_TIM_Send_PeriodElapsedCallback();
 
     uint8_t Intime_Joint_Space_Dynamic_Tuning(float Intime_x, float Intime_y, float Intime_z, float Intime_T,
     Pose_Orientation Intime_Attitude, Enum_Order_OF_Robotic_Arm_Path_Planning_Curve Intime_Order_Num);
@@ -132,7 +133,7 @@ public:
 
     void Visual_Planning_Mode_Handle_Main();
 
-    void Robotic_Arm_TIM_10ms_PeriodElapsedCallback();
+    void Robotic_TIM_10ms_PeriodElapsedCallback();
 
     void Robotic_Main();
 
@@ -164,7 +165,7 @@ public:
 
     float position[POS_MAX_NUM][5];             //4位分别代表x,y,z,T,N,dir，第一个目标点存储在0位，N=T/Shortest_Interval
 
-    float a_quintic[POS_MAX_NUM][4][6];         //方程参数
+    float a_quintic[POS_MAX_NUM][4][6];         //4位分别代表x,y,z,T，第一个目标点存储在0位
 
     Pose_Orientation Attitude[POS_MAX_NUM]={Facing_Forward};    //默认朝前，即吸盘朝下
     Enum_Order_OF_Robotic_Arm_Path_Planning_Curve Order_Num[POS_MAX_NUM]={Third_Order}; //默认三阶
@@ -182,8 +183,10 @@ public:
     uint8_t intime_path_finish_flag=1; //即时处理标志
 
     uint8_t KEYNUM=0;
-
 };
+
+
+
 
 Matrix4x4 matrix_multiply(Matrix4x4 T1, Matrix4x4 T2);
 inline float Angle_Normalization(float theta);

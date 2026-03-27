@@ -27,15 +27,13 @@ extern "C" {              // 使用 C 语言链接方式
 #include "deta10.h"
 #include "visual_interact.h"
 }
-
 // 全局初始化完成标志位
 bool init_finished = false;
-
 // 机械臂类
 Class_Robotic_arm RoboticArm;
+Class_Robotic_Recycling RoboticArmRecycling;
 
-// 运输装置类
-Class_Robotic_Recycling RoboticRecycling;
+uint8_t a=0;
 
 /**
  * @brief FDCAN1 回调函数
@@ -92,16 +90,18 @@ void Device_FDCAN2_Callback(Struct_FDCAN_Rx_Buffer *FDCAN_RxMessage)
 	// FDCAN: 标准帧 = FDCAN_STANDARD_ID，扩展帧 = FDCAN_EXTENDED_ID
 	if (FDCAN_RxMessage->Header.IdType == FDCAN_STANDARD_ID)//判断是否为标准帧 —— RM2006/3508/6020,DM电机
 	{
+
 		switch (FDCAN_RxMessage->Header.Identifier)
 		{
-			case (0x201):
+			case 0x201:
 			{
-				RoboticRecycling.recycling_motor_elevator.Motor.FDCAN_RxCpltCallback(FDCAN_RxMessage->Data);
+				RoboticArmRecycling.recycling_motor_elevator.FDCAN_RxCpltCallback(FDCAN_RxMessage->Data);
 				break;
 			}
-			case (0x202):
+
+			case 0x202:
 			{
-				RoboticRecycling.recycling_motor_transport.Motor.FDCAN_RxCpltCallback(FDCAN_RxMessage->Data);
+				RoboticArmRecycling.recycling_motor_transport.FDCAN_RxCpltCallback(FDCAN_RxMessage->Data);
 				break;
 			}
 			default:
@@ -165,9 +165,8 @@ void Task1ms_TIM5_Callback()
 	{
 		data_mod1 = 0;
 
-		RoboticArm.Robotic_Arm_TIM_10ms_PeriodElapsedCallback();
-
-		RoboticRecycling.Robotic_Recycling_TIM_10ms_PeriodElapsedCallback();
+		RoboticArm.Robotic_TIM_10ms_PeriodElapsedCallback();
+		RoboticArmRecycling.Robotic_Recycling_TIM_10ms_PeriodElapsedCallback();
 	}
 }
 /**
@@ -196,25 +195,19 @@ void Task_Init()
 	//机械臂初始化
 	RoboticArm.Init();
 
+	//运输装置初始化
+	RoboticArmRecycling.Init();
+
 	HAL_Delay(1000);
 
 	RoboticArm.Robotic_Motor_Get();
 
-	//预设的动作
-	// /* 吸取···高度 1 */
-	// RoboticArm.Set_Target_point(0.85,0.01,0.07,5,Facing_Forward,Fifth_Order);		//点0
-	// RoboticArm.Set_Target_point(-0.03,0.341,0.83,5,Facing_Forward,Fifth_Order);		//点0
-	// /* 吸取···高度 2 */
-	// RoboticArm.Set_Target_point(0.85,0.01,0.27,5,Facing_Forward,Fifth_Order);		//点0
-	// RoboticArm.Set_Target_point(-0.03,0.341,0.83,5,Facing_Forward,Fifth_Order);		//点0
-	// /* 吸取···高度 3 */
-	// RoboticArm.Set_Target_point(0.85,0.01,0.47,5,Facing_Forward,Fifth_Order);		//点0
-	RoboticArm.Set_Target_point(-0.01,0.33,0.83,3,Facing_Forward,Fifth_Order);		//点0
+	RoboticArm.Set_Target_point(-0.01,0.33,0.83,5,Facing_Forward,Fifth_Order);		//初始位置
 	if (RoboticArm.Joint_Space_Preprocessing()==1)
 	{
 		RoboticArm.path_finish_flag=0;
 	}
-
+	RoboticArmRecycling.Motion_Control_Elevator(1);
 	// UART初始化
 	UART_DMA_Receive_init(&huart1, buffer_receive_1, buffer_receive_length_1);//配置串口1接收VOFA+
 	UART_DMA_Receive_init(&huart7, buffer_receive_7, buffer_receive_length_7);//配置串口7接收陀螺仪
@@ -238,14 +231,15 @@ void Task_Init()
 		tempFloat[7]=RoboticArm.DH_arm_motor[1].Now_Angle*180/PI;
 		tempFloat[8]=RoboticArm.DH_arm_motor[2].Now_Angle*180/PI;
     	tempFloat[9]=RoboticArm.DH_arm_motor[3].Now_Angle*180/PI;
-    	tempFloat[10]=-RoboticArm.Horizontal_Controller.Get_Out();
+    	tempFloat[10]=RoboticArmRecycling.recycling_motor_elevator.Get_Now_Angle()*180/PI;
     	tempFloat[11]=RoboticArm.arm_motor4.Get_Now_Omega();
 		tempFloat[12]=IMUdata[1]*180/PI-2;
-
 		tempFloat[13]=Vofa_Slider1;
 		tempFloat[14]=Vofa_Slider2;
 		tempFloat[15]=Vofa_Slider3;
-		Vofa_Transmit(&huart1,16);
+    	tempFloat[16]=a;
+
+		Vofa_Transmit(&huart1,17);
     }
 }
 

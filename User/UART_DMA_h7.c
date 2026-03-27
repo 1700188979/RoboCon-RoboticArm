@@ -84,27 +84,54 @@ void UART_DMA_Receive_init(UART_HandleTypeDef *usart, uint8_t *buffer, uint8_t l
   * @param[in]      长度  【1-128】
   * @retval         none
   */
+// void UART_DMA_Receive_IT(UART_HandleTypeDef *usart, DMA_HandleTypeDef *DMA, uint8_t *buffer, uint8_t length)
+// {
+//  if(__HAL_UART_GET_FLAG(usart, UART_FLAG_IDLE))
+//  {
+//      __HAL_UART_CLEAR_IDLEFLAG(usart);
+//      HAL_UART_DMAStop(usart);
+//      uint8_t real_length = length - (uint8_t)(((DMA_Stream_TypeDef *)DMA->Instance)->NDTR);
+//
+//       if(usart == &huart1) UART1_Receive_Serve(buffer, real_length);//选择解码程序
+//       // if(usart == &huart2) UART2_Receive_Serve(buffer, real_length);//选择解码程序
+//       // if(usart == &huart3) UART3_Receive_Serve(buffer, real_length);//选择解码程序
+//       // if(usart == &huart4) UART4_Receive_Serve(buffer, real_length);//选择解码程序
+//       // if(usart == &huart5) UART5_Receive_Serve(buffer, real_length);//选择解码程序
+//       // if(usart == &huart6) UART6_Receive_Serve(buffer, real_length);//选择解码程序
+//       if(usart == &huart7) UART7_Receive_Serve(buffer, real_length);//选择解码程序
+//       // if(usart == &huart8) UART8_Receive_Serve(buffer, real_length);//选择解码程序
+//       // if(usart == &huart9) UART9_Receive_Serve(buffer, real_length);//选择解码程序
+//       if(usart == &huart10) UART10_Receive_Serve(buffer, real_length);//选择解码程序
+// 	  HAL_UART_Receive_DMA(usart, buffer, length);//重新打开DMA接收
+//  }
+//}
 void UART_DMA_Receive_IT(UART_HandleTypeDef *usart, DMA_HandleTypeDef *DMA, uint8_t *buffer, uint8_t length)
 {
- if(__HAL_UART_GET_FLAG(usart, UART_FLAG_IDLE))
- {
-     __HAL_UART_CLEAR_IDLEFLAG(usart);
-     HAL_UART_DMAStop(usart);
-     uint8_t real_length = length - (uint8_t)(((DMA_Stream_TypeDef *)DMA->Instance)->NDTR);
+    if(__HAL_UART_GET_FLAG(usart, UART_FLAG_IDLE))
+    {
+        __HAL_UART_CLEAR_IDLEFLAG(usart);
 
-      if(usart == &huart1) UART1_Receive_Serve(buffer, real_length);//选择解码程序
-      // if(usart == &huart2) UART2_Receive_Serve(buffer, real_length);//选择解码程序
-      // if(usart == &huart3) UART3_Receive_Serve(buffer, real_length);//选择解码程序
-      // if(usart == &huart4) UART4_Receive_Serve(buffer, real_length);//选择解码程序
-      // if(usart == &huart5) UART5_Receive_Serve(buffer, real_length);//选择解码程序
-      // if(usart == &huart6) UART6_Receive_Serve(buffer, real_length);//选择解码程序
-      if(usart == &huart7) UART7_Receive_Serve(buffer, real_length);//选择解码程序
-      // if(usart == &huart8) UART8_Receive_Serve(buffer, real_length);//选择解码程序
-      // if(usart == &huart9) UART9_Receive_Serve(buffer, real_length);//选择解码程序
-      if(usart == &huart10) UART10_Receive_Serve(buffer, real_length);//选择解码程序
-      memset(buffer,0,real_length);
-	  HAL_UART_Receive_DMA(usart, buffer, length);//重新打开DMA接收
- }
+        HAL_UART_DMAStop(usart);
+
+        uint16_t dma_remaining = __HAL_DMA_GET_COUNTER(DMA);
+        uint16_t real_length = length - dma_remaining;
+
+        if(real_length > 0)
+        {
+            if(usart == &huart1) UART1_Receive_Serve(buffer, real_length);//选择解码程序
+            // if(usart == &huart2) UART2_Receive_Serve(buffer, real_length);//选择解码程序
+            // if(usart == &huart3) UART3_Receive_Serve(buffer, real_length);//选择解码程序
+            // if(usart == &huart4) UART4_Receive_Serve(buffer, real_length);//选择解码程序
+            // if(usart == &huart5) UART5_Receive_Serve(buffer, real_length);//选择解码程序
+            // if(usart == &huart6) UART6_Receive_Serve(buffer, real_length);//选择解码程序
+            if(usart == &huart7) UART7_Receive_Serve(buffer, real_length);//选择解码程序
+            // if(usart == &huart8) UART8_Receive_Serve(buffer, real_length);//选择解码程序
+            // if(usart == &huart9) UART9_Receive_Serve(buffer, real_length);//选择解码程序
+            if(usart == &huart10) UART10_Receive_Serve(buffer, real_length);//选择解码程序
+
+        }
+        HAL_UART_Receive_DMA(usart, buffer, length);//重新打开DMA接收
+    }
 }
 
 /**
@@ -189,7 +216,6 @@ static void UART10_Receive_Serve(uint8_t *buffer, uint8_t length)
     //DMA无需开circle模式
     if (VS_Receive_flag==0)
     {
-        Visual_Get_Convert(buffer,length);
-        VS_Receive_flag=1;
+        Visual_Get_Convert2(buffer,length);
     }
 }

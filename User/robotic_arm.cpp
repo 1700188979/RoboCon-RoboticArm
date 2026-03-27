@@ -5,8 +5,8 @@
 #include "robotic_arm.h"
 
 // 添加 .cpp 的头文件（通常放置在此处）
-#include "robotic_recycling.h"
 #include "drv_tim_h7.h"
+#include "dvc_motor_dji_h7.h"
 #include "dvc_motor_dm_h7.h"
 #include "drv_fdcan_h7.h"
 
@@ -64,6 +64,7 @@ void Class_Robotic_arm::Init()
 	arm_motor2.FDCAN_Send_Enter();
 	arm_motor3.FDCAN_Send_Enter();
 	arm_motor4.FDCAN_Send_Enter();
+	Robotic_Motor_Get();			//得到初始角度
 	HAL_Delay(200);
 	/* PID参数初始化 */
 	arm_motor1.Set_K_D(1);
@@ -75,8 +76,6 @@ void Class_Robotic_arm::Init()
 	arm_motor4.Set_K_D(1);
 	arm_motor4.Set_K_P(0);
 	arm_motor3.Set_Control_Torque(10);
-
-	Robotic_Motor_Get();			//得到初始角度
 
 	//末端水平控制器
 	Horizontal_Controller.Init(35,18,0,0,0,5 );
@@ -925,7 +924,7 @@ void Class_Robotic_arm::Set_Target_point(float x, float y, float z, float t, Pos
 }
 
 /**
- * @brief 清理目标点
+ * @brief 设置目标点
  */
 void Class_Robotic_arm::Clear_Path_Planning()
 {
@@ -1045,7 +1044,7 @@ void Class_Robotic_arm::Robotic_Motor_Get()
 /**
  * @brief 机械臂4电机的PID计算
  */
-void Class_Robotic_arm::Robotic_Arm_TIM_Send_PeriodElapsedCallback()
+void Class_Robotic_arm::Robotic_TIM_Send_PeriodElapsedCallback()
 {
 	//读取当前值并设置下一个时间间隔的值
 	Robotic_Motor_Get();
@@ -1201,9 +1200,9 @@ void Class_Robotic_arm::Visual_Planning_Mode_Handle_Main()
 	//多点规划模式
 	if (VS_Receive_flag==1&&intime_path_finish_flag==1)
 	{
-		Intime_x=Data_Visual_Receive.x;
-		Intime_y=Data_Visual_Receive.y;
-		Intime_z=Data_Visual_Receive.z;
+		Intime_x=Data_Visual_Receive1.x;
+		Intime_y=Data_Visual_Receive1.y;
+		Intime_z=Data_Visual_Receive1.z;
 		Intime_T=0.5;
 		if (Intime_T>0 && Intime_Joint_Space_Dynamic_Tuning(Intime_x,Intime_y,Intime_z,Intime_T,Facing_Forward,Fifth_Order)==1)//有效坐标
 		{
@@ -1219,7 +1218,7 @@ void Class_Robotic_arm::Visual_Planning_Mode_Handle_Main()
 /*
  * @brief 机械臂类定义的外部接口函数，便于整合部件时被调用使用，定时器1ms调用一次
  */
-void Class_Robotic_arm::Robotic_Arm_TIM_10ms_PeriodElapsedCallback()
+void Class_Robotic_arm::Robotic_TIM_10ms_PeriodElapsedCallback()
 {
 	//多点规划模式
 	Multi_Point_Planning_Mode();
@@ -1233,7 +1232,7 @@ void Class_Robotic_arm::Robotic_Arm_TIM_10ms_PeriodElapsedCallback()
 	//静力平衡前馈力矩计算
 	// Static_Equilibrium();
 	//电机PID计算+
-	Robotic_Arm_TIM_Send_PeriodElapsedCallback();
+	Robotic_TIM_Send_PeriodElapsedCallback();
 }
 
 /*
@@ -1246,7 +1245,7 @@ void Class_Robotic_arm::Robotic_Main()
 	//单点规划模式在主函数中的程序
 	Single_Point_Planning_Mode_Handle_Main();
 	//视觉规划模式在主函数中的程序
-	Visual_Planning_Mode_Handle_Main();
+	// Visual_Planning_Mode_Handle_Main();
 }
 
 /*
@@ -1306,32 +1305,33 @@ void Class_Robotic_arm::Static_Equilibrium()
  */
 void Class_Robotic_arm::Robotic_Button_Scan()
 {
-	// 按键 1
-	if (Vofa_Button1 == 1)
+	if (path_finish_flag==0 || intime_path_finish_flag==0)
 	{
-		// HAL_Delay(10);		// 延时10ms消抖
-		// if (Vofa_Button1 == 1)
-		// {
-		// 	while (Vofa_Button1);   // 松手检测
-			KEYNUM = 1;
-			Vofa_Button1 = 0;
-		// }
+		Vofa_Button1 = 0;
+		Vofa_Button2 = 0;
+		Vofa_Button3 = 0;
+		Data_Visual_Receive2.flag=0;
+		return;
+	}
+	VS_Receive_flag=0;
+	// 按键 1
+	if (Vofa_Button1 == 1 || Data_Visual_Receive2.flag == 1)
+	{
+		KEYNUM = 1;
+		Vofa_Button1 = 0;
+		Data_Visual_Receive2.flag=0;
 	}
 
 	// 按键 2
-	else if (Vofa_Button2 == 1)
+	else if (Vofa_Button2 == 1 || Data_Visual_Receive2.flag == 2)
 	{
-		// HAL_Delay(10);		// 延时10ms消抖
-		// if (Vofa_Button2 == 1)
-		// {
-		// 	while (Vofa_Button2);   // 松手检测
-			KEYNUM = 2;
-			Vofa_Button2 = 0;
-		// }
+		KEYNUM = 2;
+		Vofa_Button2 = 0;
+		Data_Visual_Receive2.flag=0;
 	}
 
 	// 按键 3
-	else if (Vofa_Button3 == 1)
+	else if (Vofa_Button3 == 1 || Data_Visual_Receive2.flag == 3)
 	{
 		// HAL_Delay(10);		// 延时10ms消抖
 		// if (Vofa_Button3 == 1)
@@ -1339,6 +1339,7 @@ void Class_Robotic_arm::Robotic_Button_Scan()
 		// 	while (Vofa_Button3);   // 松手检测
 			KEYNUM = 3;
 			Vofa_Button3 = 0;
+			Data_Visual_Receive2.flag=0;
 		// }
 	}
 
@@ -1369,25 +1370,25 @@ void Class_Robotic_arm::Robotic_Button_Function()
 	if (KEYNUM==1)
 	{
 		/* 吸取···高度 1 */
-		Set_Target_point(0.8,0.01,0.38,3,Facing_Forward,Third_Order);			// 目标KFS上方
-		Set_Target_point(0.85,0.01,0.17,1,Facing_Forward,Fifth_Order);			// 目标KFS位置
-		Set_Target_point(-0.01,0.341,0.83,5,Facing_Forward,Fifth_Order);		// 回收位置
+		Set_Target_point(0.8,0.01,0.38,2,Facing_Forward,Third_Order);			// 目标KFS上方
+		Set_Target_point(0.85,0.01,0.17,0.5,Facing_Forward,Fifth_Order);			// 目标KFS位置
+		Set_Target_point(-0.01,0.341,0.83,2,Facing_Forward,Fifth_Order);		// 回收位置
 	}
 
 	else if (KEYNUM==2)
 	{
 		/* 吸取···高度 2 */
-		Set_Target_point(0.8,0.01,0.48,3,Facing_Forward,Third_Order);			// 目标KFS上方
-		Set_Target_point(0.85,0.01,0.34,1,Facing_Forward,Fifth_Order);			// 目标KFS位置
-		Set_Target_point(-0.01,0.27,0.83,5,Facing_Forward,Fifth_Order);		// 回收位置
+		Set_Target_point(0.8,0.01,0.48,2,Facing_Forward,Third_Order);			// 目标KFS上方
+		Set_Target_point(0.85,0.01,0.34,0.5,Facing_Forward,Fifth_Order);			// 目标KFS位置
+		Set_Target_point(-0.01,0.27,0.83,2,Facing_Forward,Fifth_Order);		// 回收位置
 	}
 
 	else if (KEYNUM==3)
 	{
 		/* 吸取···高度 3 */
-		Set_Target_point(0.8,0.01,0.58,3,Facing_Forward,Third_Order);			// 目标KFS上方
-		Set_Target_point(0.85,0.01,0.53,1,Facing_Forward,Fifth_Order);			// 目标KFS位置
-		Set_Target_point(-0.01,0.341,0.83,5,Facing_Forward,Fifth_Order);		// 回收位置
+		Set_Target_point(0.8,0.01,0.58,2,Facing_Forward,Third_Order);			// 目标KFS上方
+		Set_Target_point(0.85,0.01,0.53,0.5,Facing_Forward,Fifth_Order);			// 目标KFS位置
+		Set_Target_point(-0.01,0.341,0.83,2,Facing_Forward,Fifth_Order);		// 回收位置
 	}
 
 	else

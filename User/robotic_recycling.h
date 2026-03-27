@@ -28,12 +28,6 @@ enum Enum_Robotic_Recycling_Motor_Function_Type
 
 typedef struct Robotic_Recycling_Motor_Type
 {
-    Class_Motor_DJI_C610 Motor;
-
-    Enum_Robotic_Recycling_Motor_Function_Type Function_Type;
-
-    Enum_Order_OF_Robotic_Recycling_Path_Planning_Curve Order_OF = RECYCLEING_Fifth_Order;
-
     float Targrt_Angle = 0;
 
     float T = 0;
@@ -52,6 +46,10 @@ typedef struct Robotic_Recycling_Motor_Type
 
     uint8_t path_finish_flag = 1;
 
+    Enum_Robotic_Recycling_Motor_Function_Type Function_Type;
+
+    Enum_Order_OF_Robotic_Recycling_Path_Planning_Curve Order_OF = RECYCLEING_Fifth_Order;
+
 }Robotic_Recycling_Motor_Type;
 
 class Class_Robotic_Recycling
@@ -60,26 +58,32 @@ public:
 
     void Init();
 
-    void Set_Target_point(Robotic_Recycling_Motor_Type Type, float distance, float T,
+    void Recycling_Set_Target_point(Robotic_Recycling_Motor_Type* Type, float distance, float T,
         Enum_Robotic_Recycling_Motor_Function_Type Function_Type, Enum_Order_OF_Robotic_Recycling_Path_Planning_Curve Order_OF);
 
-    void Joint_Space_Quintic_Cal_Via_Para(float T, float theta0, float thetaf, Enum_Order_OF_Robotic_Recycling_Path_Planning_Curve Target_Order_Num, float a[6]);
+    void Recycling_Joint_Space_Quintic_Cal_Via_Para(float T, float theta0, float thetaf, Enum_Order_OF_Robotic_Recycling_Path_Planning_Curve Target_Order_Num, float a[6]);
 
-    void Clear_Path_Planning(Robotic_Recycling_Motor_Type Type);
+    void Recycling_Clear_Path_Planning(Robotic_Recycling_Motor_Type* Type);
 
-    inline void Joint_Space_Preprocessing(Robotic_Recycling_Motor_Type Type);
+    inline void Recycling_Joint_Space_Preprocessing(Robotic_Recycling_Motor_Type* Type);
 
-    void Joint_Space_Via_Path_Planning(Robotic_Recycling_Motor_Type Type);
+    void Recycling_Joint_Space_Via_Path_Planning(Robotic_Recycling_Motor_Type* Type);
 
-    void Joint_Space_Path_Planning(Robotic_Recycling_Motor_Type Type);
+    void Recycling_Joint_Space_Path_Planning(Robotic_Recycling_Motor_Type* Type);
 
     void Robotic_Recycling_TIM_10ms_PeriodElapsedCallback();
 
-    Robotic_Recycling_Motor_Type recycling_motor_elevator;      // 控制升降
+    void Motion_Control_Elevator(uint8_t state);
 
-    Robotic_Recycling_Motor_Type recycling_motor_transport;     // 控制运输
+    void Motion_Control_Transport(uint8_t state);
 
+    Robotic_Recycling_Motor_Type recycling_para_elevator;      // 控制升降
 
+    Robotic_Recycling_Motor_Type recycling_para_transport;     // 控制运输
+
+    Class_Motor_DJI_C610 recycling_motor_elevator;
+
+    Class_Motor_DJI_C610 recycling_motor_transport;
 
 };
 

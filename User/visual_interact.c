@@ -9,24 +9,47 @@
 #include "usart.h"
 
 uint8_t text_rx_finish[2]={VISUAL_FRAME_HEADER,VISUAL_FRAME_TAIL};
-Visual_RxConvert_Typedef Data_Visual_Receive;
+Visual_RxConvert_Typedef1 Data_Visual_Receive1;
+Visual_RxConvert_Typedef2 Data_Visual_Receive2;
 uint8_t VS_Receive_flag=0;
 uint8_t Vofa_Receive_flag=0;
 
 float a_visual=0.22f;
 uint8_t Send_Data[50];
+
 /*
  * 规定 0x0A (float)x (float)y (float)z 0x6B
  */
-void Visual_Get_Convert(uint8_t *buffer, uint8_t length)
+void Visual_Get_Convert1(uint8_t *buffer, uint8_t length)
 {
+
+    a=1;
     if (length != 14) return; // 通信协议约定数据帧固定长度为 14
 
     if (buffer[0] != VISUAL_FRAME_HEADER || buffer[13] != VISUAL_FRAME_TAIL)
         return;
-    memcpy(&Data_Visual_Receive,buffer,sizeof(Visual_RxConvert_Typedef));
+    memcpy(&Data_Visual_Receive1,buffer,sizeof(Visual_RxConvert_Typedef1));
 
     VS_Receive_flag=1;
+
+    a=length;
+}
+
+/*
+ * 规定 0x0A (uint8_t)flag 0x6B
+ */
+void Visual_Get_Convert2(uint8_t *buffer, uint8_t length)
+{
+    a=length;
+
+    if (length != 3) return; // 通信协议约定数据帧固定长度为 3
+
+    if (buffer[0] != VISUAL_FRAME_HEADER || buffer[2] != VISUAL_FRAME_TAIL)
+        return;
+    memcpy(&Data_Visual_Receive2,buffer,sizeof(Visual_RxConvert_Typedef2));
+
+    VS_Receive_flag=1;
+
 }
 
 /*
