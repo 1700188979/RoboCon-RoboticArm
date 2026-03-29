@@ -1227,7 +1227,7 @@ void Class_Robotic_arm::Robotic_TIM_10ms_PeriodElapsedCallback()
 	//视觉规划模式（即时）
 	Visual_Planning_Mode();
 	//末端水平控制PID计算
-	Horizontal_Controller.Set_Now(-(IMUdata[1]-0.0349));
+	Horizontal_Controller.Set_Now(-(IMUdata[1]-0.0349f));
 	Horizontal_Controller.TIM_Calculate_PeriodElapsedCallback();
 	//静力平衡前馈力矩计算
 	// Static_Equilibrium();
@@ -1305,14 +1305,6 @@ void Class_Robotic_arm::Static_Equilibrium()
  */
 void Class_Robotic_arm::Robotic_Button_Scan()
 {
-	if (path_finish_flag==0 || intime_path_finish_flag==0)
-	{
-		Vofa_Button1 = 0;
-		Vofa_Button2 = 0;
-		Vofa_Button3 = 0;
-		Data_Visual_Receive2.flag=0;
-		return;
-	}
 	VS_Receive_flag=0;
 	// 按键 1
 	if (Vofa_Button1 == 1 || Data_Visual_Receive2.flag == 1)
@@ -1357,6 +1349,10 @@ void Class_Robotic_arm::Robotic_Button_Function()
 {
 	if (path_finish_flag==0 || intime_path_finish_flag==0)
 	{
+		Vofa_Button1 = 0;
+		Vofa_Button2 = 0;
+		Vofa_Button3 = 0;
+		Data_Visual_Receive2.flag=0;
 		return;
 	}
 

@@ -67,6 +67,11 @@ void Device_FDCAN1_Callback(Struct_FDCAN_Rx_Buffer *FDCAN_RxMessage)
 				RoboticArm.arm_motor4.FDCAN_RxCpltCallback(FDCAN_RxMessage->Data);
 				break;
 			}
+			case 0x101:
+			{
+				RoboticArm.arm_motor4.FDCAN_RxCpltCallback(FDCAN_RxMessage->Data);
+				break;
+			}
 			default:
 				break;
 		}
