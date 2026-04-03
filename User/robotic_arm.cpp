@@ -1335,6 +1335,21 @@ void Class_Robotic_arm::Robotic_Button_Scan()
 		// }
 	}
 
+	// 按键 4
+	else if (Vofa_Button4 == 1 || Data_Visual_Receive2.flag == 4)
+	{
+		KEYNUM = 4;
+		Vofa_Button4 = 0;
+		Data_Visual_Receive2.flag=0;
+	}
+
+	// 按键 5
+	else if (Vofa_Button5 == 1 || Data_Visual_Receive2.flag == 5)
+	{
+		KEYNUM = 5;
+		Vofa_Button5 = 0;
+		Data_Visual_Receive2.flag=0;
+	}
 	// 无按键按下
 	else
 	{
@@ -1352,6 +1367,8 @@ void Class_Robotic_arm::Robotic_Button_Function()
 		Vofa_Button1 = 0;
 		Vofa_Button2 = 0;
 		Vofa_Button3 = 0;
+		Vofa_Button4 = 0;
+		Vofa_Button5 = 0;
 		Data_Visual_Receive2.flag=0;
 		return;
 	}
@@ -1367,7 +1384,7 @@ void Class_Robotic_arm::Robotic_Button_Function()
 	{
 		/* 吸取···高度 1 */
 		Set_Target_point(0.8,0.01,0.38,2,Facing_Forward,Third_Order);			// 目标KFS上方
-		Set_Target_point(0.85,0.01,0.17,0.5,Facing_Forward,Fifth_Order);			// 目标KFS位置
+		Set_Target_point(0.85,0.01,0.17,0.5,Facing_Forward,Fifth_Order);		// 目标KFS位置
 		Set_Target_point(-0.01,0.341,0.83,2,Facing_Forward,Fifth_Order);		// 回收位置
 	}
 
@@ -1375,7 +1392,7 @@ void Class_Robotic_arm::Robotic_Button_Function()
 	{
 		/* 吸取···高度 2 */
 		Set_Target_point(0.8,0.01,0.48,2,Facing_Forward,Third_Order);			// 目标KFS上方
-		Set_Target_point(0.85,0.01,0.34,0.5,Facing_Forward,Fifth_Order);			// 目标KFS位置
+		Set_Target_point(0.85,0.01,0.34,0.5,Facing_Forward,Fifth_Order);		// 目标KFS位置
 		Set_Target_point(-0.01,0.27,0.83,2,Facing_Forward,Fifth_Order);		// 回收位置
 	}
 
@@ -1383,7 +1400,23 @@ void Class_Robotic_arm::Robotic_Button_Function()
 	{
 		/* 吸取···高度 3 */
 		Set_Target_point(0.8,0.01,0.58,2,Facing_Forward,Third_Order);			// 目标KFS上方
-		Set_Target_point(0.85,0.01,0.53,0.5,Facing_Forward,Fifth_Order);			// 目标KFS位置
+		Set_Target_point(0.85,0.01,0.53,0.5,Facing_Forward,Fifth_Order);		// 目标KFS位置
+		Set_Target_point(-0.01,0.341,0.83,2,Facing_Forward,Fifth_Order);		// 回收位置
+	}
+
+	else if (KEYNUM==4)
+	{
+		/* 放KFS高度 */
+		Set_Target_point(0.8,0.01,0.58,2,Facing_Forward,Third_Order);			// 目标KFS上方
+		Set_Target_point(0.85,0.01,0.53,0.5,Facing_Forward,Fifth_Order);		// 目标KFS位置
+		Set_Target_point(-0.01,0.341,0.83,2,Facing_Forward,Fifth_Order);		// 回收位置
+	}
+
+	else if (KEYNUM==5)
+	{
+		/* 吸取地上的KFS高度 */
+		Set_Target_point(0.8,0.01,0.58,2,Facing_Forward,Third_Order);			// 目标KFS上方
+		Set_Target_point(0.85,0.01,0.53,0.5,Facing_Forward,Fifth_Order);		// 目标KFS位置
 		Set_Target_point(-0.01,0.341,0.83,2,Facing_Forward,Fifth_Order);		// 回收位置
 	}
 

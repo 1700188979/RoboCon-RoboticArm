@@ -34,6 +34,9 @@ Class_Robotic_arm RoboticArm;
 Class_Robotic_Recycling RoboticArmRecycling;
 
 uint8_t a=0;
+/***************************************************/
+// Class_Vesc VESC_test_ID101;
+/***************************************************/
 
 /**
  * @brief FDCAN1 回调函数
@@ -67,11 +70,6 @@ void Device_FDCAN1_Callback(Struct_FDCAN_Rx_Buffer *FDCAN_RxMessage)
 				RoboticArm.arm_motor4.FDCAN_RxCpltCallback(FDCAN_RxMessage->Data);
 				break;
 			}
-			case 0x101:
-			{
-				RoboticArm.arm_motor4.FDCAN_RxCpltCallback(FDCAN_RxMessage->Data);
-				break;
-			}
 			default:
 				break;
 		}
@@ -80,6 +78,14 @@ void Device_FDCAN1_Callback(Struct_FDCAN_Rx_Buffer *FDCAN_RxMessage)
 	{
 		switch (FDCAN_RxMessage->Header.Identifier)
 		{
+			/***************************************************/
+			// case ((CAN_PACKET_STATUS << 8) | 101):
+			// {
+			//
+			// 	VESC_test_ID101.FDCAN_RxCpltCallback(FDCAN_RxMessage->Data);
+			// 	break;
+			// }
+			/***************************************************/
 			default:
 				break;
 		}
@@ -164,14 +170,23 @@ void Task1ms_TIM5_Callback()
 	}
 
 	//100Hz
-	static int data_mod1 = 0;
-	data_mod1++;
-	if (data_mod1 == 10)
+	static int data_mod10 = 0;
+	data_mod10++;
+	if (data_mod10 == 10)
 	{
-		data_mod1 = 0;
+		data_mod10 = 0;
 
 		RoboticArm.Robotic_TIM_10ms_PeriodElapsedCallback();
 		RoboticArmRecycling.Robotic_Recycling_TIM_10ms_PeriodElapsedCallback();
+	}
+
+	//1000Hz
+	static int data_mod1 = 0;
+	data_mod1++;
+	if (data_mod1 == 1)
+	{
+		data_mod1 = 0;
+		// VESC_test_ID101.TIM_Send_PeriodElapsedCallback();
 	}
 }
 /**
@@ -186,6 +201,11 @@ void Task_Init()
 	FDCAN_Init(&hfdcan1, Device_FDCAN1_Callback);
 	FDCAN_Init(&hfdcan2, Device_FDCAN2_Callback);
 	FDCAN_Init(&hfdcan3, Device_FDCAN3_Callback);
+
+	// UART初始化
+	UART_DMA_Receive_init(&huart1, buffer_receive_1, buffer_receive_length_1);//配置串口1接收VOFA+
+	UART_DMA_Receive_init(&huart7, buffer_receive_7, buffer_receive_length_7);//配置串口7接收陀螺仪
+	UART_DMA_Receive_init(&huart10, buffer_receive_10, buffer_receive_length_10);//配置串口10接收摄像头
 
     // 定时器初始化
     TIM_Init(&htim5, Task1ms_TIM5_Callback);
@@ -203,25 +223,29 @@ void Task_Init()
 	//运输装置初始化
 	RoboticArmRecycling.Init();
 
+	/***************************************************/
+	// VESC_test_ID101.Init(&hfdcan1,101);
+	/***************************************************/
+
 	HAL_Delay(1000);
 
 	RoboticArm.Robotic_Motor_Get();
 
-	RoboticArm.Set_Target_point(-0.01,0.33,0.83,5,Facing_Forward,Fifth_Order);		//初始位置
+	// RoboticArm.Set_Target_point(0.8,0.01,0.58,2,Facing_Forward,Fifth_Order);			// 目标KFS上方
+	RoboticArm.Set_Target_point(0.33,0.01,0.83,3,Facing_Forward,Third_Order);		//初始位置
 	if (RoboticArm.Joint_Space_Preprocessing()==1)
 	{
 		RoboticArm.path_finish_flag=0;
 	}
 	RoboticArmRecycling.Motion_Control_Elevator(1);
-	// UART初始化
-	UART_DMA_Receive_init(&huart1, buffer_receive_1, buffer_receive_length_1);//配置串口1接收VOFA+
-	UART_DMA_Receive_init(&huart7, buffer_receive_7, buffer_receive_length_7);//配置串口7接收陀螺仪
-	UART_DMA_Receive_init(&huart10, buffer_receive_10, buffer_receive_length_10);//配置串口10接收摄像头
 
 	HAL_Delay(4000);//陀螺仪上电5s
 	//初始化完成
 	init_finished = true;
 	HAL_GPIO_WritePin(GPIOE,GPIO_PIN_13,GPIO_PIN_SET);
+	/***************************************************/
+	// VESC_test_ID101.Set_Target_Vel(1500);
+	/***************************************************/
     while (1)
     {
     	RoboticArm.Robotic_Main();
@@ -242,7 +266,8 @@ void Task_Init()
 		tempFloat[13]=Vofa_Slider1;
 		tempFloat[14]=Vofa_Slider2;
 		tempFloat[15]=Vofa_Slider3;
-    	tempFloat[16]=a;
+    	tempFloat[16]=RoboticArm.KEYNUM;
+    	// tempFloat[17]=VESC_test_ID101.Get_Now_Vel();
 
 		Vofa_Transmit(&huart1,17);
     }

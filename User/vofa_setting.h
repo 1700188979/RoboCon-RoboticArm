@@ -28,8 +28,8 @@ extern float tempFloat[25];
 #define UseVOFAButton1
 #define UseVOFAButton2
 #define UseVOFAButton3
-//#define UseVOFAButton4
-//#define UseVOFAButton5
+#define UseVOFAButton4
+#define UseVOFAButton5
 //#define UseVOFAButton6
 //#define UseVOFAButton7
 //#define UseVOFAButton8
@@ -80,10 +80,10 @@ extern float tempFloat[25];
 #define Vofa_Button3 VofaData[9]
 #endif
 #ifdef UseVOFAButton4
-#define Vofa_Button4
+#define Vofa_Button4 VofaData[10]
 #endif
 #ifdef UseVOFAButton5
-#define Vofa_Button5
+#define Vofa_Button5 VofaData[11]
 #endif
 #ifdef UseVOFAButton6
 #define Vofa_Button6

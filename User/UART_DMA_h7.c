@@ -73,8 +73,14 @@ static void UART10_Receive_Serve(uint8_t *buffer, uint8_t length);
   */
 void UART_DMA_Receive_init(UART_HandleTypeDef *usart, uint8_t *buffer, uint8_t length)
 {
-  __HAL_UART_ENABLE_IT(usart,UART_IT_IDLE);
-  HAL_UART_Receive_DMA(usart,buffer,length);//打开DMA接收
+    // 1. 强行清除溢出错误 (ORE) 标志位，防止之前的积压锁死 DMA
+    __HAL_UART_CLEAR_FLAG(usart, UART_CLEAR_OREF);
+
+    // 2. 清除可能误触发的空闲标志位
+    __HAL_UART_CLEAR_IDLEFLAG(usart);
+
+    __HAL_UART_ENABLE_IT(usart,UART_IT_IDLE);
+    HAL_UART_Receive_DMA(usart,buffer,length);//打开DMA接收
 }
 /**
   * @brief          串口DMA接收中断函数->放入《USER CODE BEGIN USARTX_IRQn 1》 中
