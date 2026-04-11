@@ -38,6 +38,12 @@ enum Motor_Rotation_Adjust
     Reverse_Rotation = 1
 };
 
+enum Trajectory_Planning_Algorithm_Type
+{
+    Polynomial_Interpolation_Method = 0,
+    S_curve_Planning_Method = 1
+};
+
 /**
  * @brief 关节DH参数
  * 沿 Z平移di
@@ -63,10 +69,21 @@ typedef struct Transformation_Matrix_Para
     float MIN_Angle;
     float Reduction_Ratio;
     float Torque;
-
     Matrix4x4 Matrix;
     Motor_Rotation_Adjust Rotation;
 }Transformation_Matrix_Para;
+
+/**
+ * @brief S形加减速结构体
+ */
+typedef struct {
+    float target_pos;    // 上位机发来的目标位置
+    float now_pos;       // 当前位置
+    float now_vel;       // 当前速度
+    float max_vel;       // 最大速度
+    float max_acc;       // 最大加速度
+    float max_jerk;      // 最大加加速度（S形柔度）
+} SCurveProfile;
 
 /**
  * @brief 机械臂类
@@ -139,17 +156,23 @@ public:
 
     void Air_Pump(uint8_t status);
 
-    void Static_Equilibrium();
+    void Static_Equilibrium(uint8_t IF_KFS);
 
     void Robotic_Button_Scan();
 
     void Robotic_Button_Function();
 
+    void SCurve_Calculate(SCurveProfile *p);
+
+    void SetTargetPos(SCurveProfile *p, float target);
+
+    void StopSlowly(SCurveProfile *p);
+
     /*      从下至上为轴 1 2 3 4    */
     Class_Motor_DM_Normal arm_motor1;   //轴1 motor_DM_J4340
-    Class_Motor_DM_Normal arm_motor2;   //轴2 motor_DM_J4310
+    Class_Motor_DM_Normal arm_motor2;   //轴2 motor_DM_J4340
     Class_Motor_DM_Normal arm_motor3;   //轴3 motor_DM_J4310
-    Class_Motor_DM_Normal arm_motor4;   //轴4 motor_DJI_3508
+    Class_Motor_DM_Normal arm_motor4;   //轴4 motor_DM_J4310
 
     Class_PID Horizontal_Controller;
 
@@ -168,6 +191,7 @@ public:
     float a_quintic[POS_MAX_NUM][4][6];         //4位分别代表x,y,z,T，第一个目标点存储在0位
 
     Pose_Orientation Attitude[POS_MAX_NUM]={Facing_Forward};    //默认朝前，即吸盘朝下
+
     Enum_Order_OF_Robotic_Arm_Path_Planning_Curve Order_Num[POS_MAX_NUM]={Third_Order}; //默认三阶
 
     Matrix4x4 Target_Angle_Matrix[POS_MAX_NUM]={0};
@@ -187,8 +211,8 @@ public:
 
 
 
-
 Matrix4x4 matrix_multiply(Matrix4x4 T1, Matrix4x4 T2);
+float clamp(float x, float min, float max);
 inline float Angle_Normalization(float theta);
 #endif //ROBOTIC_ARM_H
 

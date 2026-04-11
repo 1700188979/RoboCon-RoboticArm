@@ -213,14 +213,14 @@ void Task_Init()
     // 使能调度时钟
     HAL_TIM_Base_Start_IT(&htim5);
 
-	//蜂鸣器
+	// 蜂鸣器
 	HAL_TIM_PWM_Start(&htim12, TIM_CHANNEL_2);
 	// TIM12->CCR2=3000;
 
-	//机械臂初始化
+	// 机械臂初始化
 	RoboticArm.Init();
 
-	//运输装置初始化
+	// 运输装置初始化
 	RoboticArmRecycling.Init();
 
 	/***************************************************/
@@ -229,20 +229,21 @@ void Task_Init()
 
 	HAL_Delay(1000);
 
+	// 读电机数据
 	RoboticArm.Robotic_Motor_Get();
 
-	// RoboticArm.Set_Target_point(0.8,0.01,0.58,2,Facing_Forward,Fifth_Order);			// 目标KFS上方
+	// 位置初始化
 	RoboticArm.Set_Target_point(0.33,0.01,0.83,3,Facing_Forward,Third_Order);		//初始位置
 	if (RoboticArm.Joint_Space_Preprocessing()==1)
 	{
 		RoboticArm.path_finish_flag=0;
 	}
 	RoboticArmRecycling.Motion_Control_Elevator(1);
-
-	HAL_Delay(4000);//陀螺仪上电5s
-	//初始化完成
+	HAL_Delay(4000);//陀螺仪上电6s
+	// 初始化完成
 	init_finished = true;
-	HAL_GPIO_WritePin(GPIOE,GPIO_PIN_13,GPIO_PIN_SET);
+	// 电磁阀
+	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_0,GPIO_PIN_RESET);
 	/***************************************************/
 	// VESC_test_ID101.Set_Target_Vel(1500);
 	/***************************************************/

@@ -40,6 +40,16 @@ Matrix4x4 matrix_multiply(Matrix4x4 T1, Matrix4x4 T2)
 }
 
 /**
+ * @brief 限幅函数
+ */
+float clamp(float x, float min, float max)
+{
+	if(x > max) return max;
+	if(x < min) return min;
+	return x;
+}
+
+/**
  * @brief 角度归一化
  */
 inline float Angle_Normalization(float theta)
@@ -58,7 +68,7 @@ void Class_Robotic_arm::Init()
 	// 成员变量初始化
     arm_motor1.Init(&hfdcan1,0x05,0x01,Motor_DM_Control_Method_NORMAL_MIT,12.5,10,28,0.9);
 	arm_motor2.Init(&hfdcan1,0x06,0x02,Motor_DM_Control_Method_NORMAL_MIT,12.5,10,28,1);
-	arm_motor3.Init(&hfdcan1,0x07,0x03,Motor_DM_Control_Method_NORMAL_MIT,12.5,10,28,0.9);
+	arm_motor3.Init(&hfdcan1,0x07,0x03,Motor_DM_Control_Method_NORMAL_MIT,12.5,10,28,1);
 	arm_motor4.Init(&hfdcan1,0x08,0x04,Motor_DM_Control_Method_NORMAL_MIT,12.5,10,28,0.8);
 	arm_motor1.FDCAN_Send_Enter();
 	arm_motor2.FDCAN_Send_Enter();
@@ -78,7 +88,7 @@ void Class_Robotic_arm::Init()
 	arm_motor3.Set_Control_Torque(10);
 
 	//末端水平控制器
-	Horizontal_Controller.Init(35,18,0,0,0,5 );
+	Horizontal_Controller.Init(35,15,0,0,0,5 );
 	Horizontal_Controller.Set_Target(0);
 
 	Init_Maxtrix();
@@ -1230,7 +1240,7 @@ void Class_Robotic_arm::Robotic_TIM_10ms_PeriodElapsedCallback()
 	Horizontal_Controller.Set_Now(-(IMUdata[1]-0.0349f));
 	Horizontal_Controller.TIM_Calculate_PeriodElapsedCallback();
 	//静力平衡前馈力矩计算
-	// Static_Equilibrium();
+	// Static_Equilibrium(0);
 	//电机PID计算+
 	Robotic_TIM_Send_PeriodElapsedCallback();
 }
@@ -1240,7 +1250,7 @@ void Class_Robotic_arm::Robotic_TIM_10ms_PeriodElapsedCallback()
  */
 void Class_Robotic_arm::Robotic_Main()
 {
-	//多点规划模式在主函数中的程序
+	//多点规划模式在主函数中的程序（按键扫描）
 	Robotic_Button_Function();
 	//单点规划模式在主函数中的程序
 	Single_Point_Planning_Mode_Handle_Main();
@@ -1266,38 +1276,48 @@ void Class_Robotic_arm::Air_Pump(uint8_t status)
 /*
  * @brief 计算机械臂各个电机的力矩
  */
-void Class_Robotic_arm::Static_Equilibrium()
+void Class_Robotic_arm::Static_Equilibrium(uint8_t IF_KFS)
 {
-	float a2=DH_arm_motor[1].a;	// 关节3参数
-	float a3=DH_arm_motor[2].a;	// 关节4参数
-	float a4=DH_arm_motor[3].a;	// 关节4参数
+	float a2 = DH_arm_motor[1].a;	// 关节3参数
+	float a3 = DH_arm_motor[2].a;	// 关节4参数
+	float a4 = DH_arm_motor[3].a;	// 关节4参数
 
-	float m2=DH_arm_motor[1].m;	// 关节3参数
-	float m3=DH_arm_motor[2].m;	// 关节4参数
-	float m4=DH_arm_motor[3].m;	// 关节4参数
+	float m2 = DH_arm_motor[1].m;	// 关节3参数
+	float m3 = DH_arm_motor[2].m;	// 关节4参数
+	float m4 = DH_arm_motor[3].m;	// 关节4参数
 
-	float p2=DH_arm_motor[1].p;	// 关节3参数
-	float p3=DH_arm_motor[2].p;	// 关节4参数
-	float p4=DH_arm_motor[3].p;	// 关节4参数
+	float p2 = DH_arm_motor[1].p;	// 关节3参数
+	float p3 = DH_arm_motor[2].p;	// 关节4参数
+	float p4 = DH_arm_motor[3].p;	// 关节4参数
 
-	float s2  = sinf(DH_arm_motor[2].Next_Angle);
-	float s23 = sinf(DH_arm_motor[2].Next_Angle+DH_arm_motor[3].Next_Angle);
+	float c2 = cosf(DH_arm_motor[2].Now_Angle);
+	float c3 = cosf(DH_arm_motor[2].Now_Angle + DH_arm_motor[3].Now_Angle);
 
 	// 末端力产生力矩
-	float t2 = mg_KFS * ( a2*s2 + a3*s23 );
-	float t3 = mg_KFS * a3 * s23;
 	float t4 = mg_KFS * a4;
+	float t3 = mg_KFS * a3 * c3 + t4;
+	float t2 = mg_KFS * a2 * c2 + t3;
 
 	// 重力矩
-	float G2 = Gravitational_Acceleration * ( m2*p2*s2 + m3*(a2*s2 + p3*s23) + m4*(a2*s2 + a3*s23) );
-	float G3 = Gravitational_Acceleration * ( m3*p3*s23 + m4*a3*s23 );
 	float G4 = Gravitational_Acceleration * m4 * p4;
+	float G3 = Gravitational_Acceleration * (m3 * p3 * c3 + m4 * a3 * c3) + G4;
+	float G2 = Gravitational_Acceleration * (m2 * p2 * c2 + a2 * c2 * (m3 + m4)) + G3;
 
 	// 总力矩
-	DH_arm_motor[0].Torque = 0;
-	DH_arm_motor[1].Torque = t2 + G2;
-	DH_arm_motor[2].Torque = t3 + G3;
-	DH_arm_motor[3].Torque = t4 + G4;
+	if (IF_KFS == 0)
+	{
+		DH_arm_motor[0].Torque = 0;
+		DH_arm_motor[1].Torque = G2;
+		DH_arm_motor[2].Torque = G3;
+		DH_arm_motor[3].Torque = G4;
+	}
+	else if (IF_KFS == 1)
+	{
+		DH_arm_motor[0].Torque = 0;
+		DH_arm_motor[1].Torque = t2 + G2;
+		DH_arm_motor[2].Torque = t3 + G3;
+		DH_arm_motor[3].Torque = t4 + G4;
+	}
 }
 
 /*
@@ -1325,14 +1345,9 @@ void Class_Robotic_arm::Robotic_Button_Scan()
 	// 按键 3
 	else if (Vofa_Button3 == 1 || Data_Visual_Receive2.flag == 3)
 	{
-		// HAL_Delay(10);		// 延时10ms消抖
-		// if (Vofa_Button3 == 1)
-		// {
-		// 	while (Vofa_Button3);   // 松手检测
-			KEYNUM = 3;
-			Vofa_Button3 = 0;
-			Data_Visual_Receive2.flag=0;
-		// }
+		KEYNUM = 3;
+		Vofa_Button3 = 0;
+		Data_Visual_Receive2.flag=0;
 	}
 
 	// 按键 4
@@ -1384,7 +1399,7 @@ void Class_Robotic_arm::Robotic_Button_Function()
 	{
 		/* 吸取···高度 1 */
 		Set_Target_point(0.8,0.01,0.38,2,Facing_Forward,Third_Order);			// 目标KFS上方
-		Set_Target_point(0.85,0.01,0.17,0.5,Facing_Forward,Fifth_Order);		// 目标KFS位置
+		Set_Target_point(0.85,0.01,0.13,0.5,Facing_Forward,Fifth_Order);		// 目标KFS位置
 		Set_Target_point(-0.01,0.341,0.83,2,Facing_Forward,Fifth_Order);		// 回收位置
 	}
 
@@ -1392,7 +1407,7 @@ void Class_Robotic_arm::Robotic_Button_Function()
 	{
 		/* 吸取···高度 2 */
 		Set_Target_point(0.8,0.01,0.48,2,Facing_Forward,Third_Order);			// 目标KFS上方
-		Set_Target_point(0.85,0.01,0.34,0.5,Facing_Forward,Fifth_Order);		// 目标KFS位置
+		Set_Target_point(0.85,0.01,0.3,0.5,Facing_Forward,Fifth_Order);		// 目标KFS位置
 		Set_Target_point(-0.01,0.27,0.83,2,Facing_Forward,Fifth_Order);		// 回收位置
 	}
 
@@ -1400,7 +1415,7 @@ void Class_Robotic_arm::Robotic_Button_Function()
 	{
 		/* 吸取···高度 3 */
 		Set_Target_point(0.8,0.01,0.58,2,Facing_Forward,Third_Order);			// 目标KFS上方
-		Set_Target_point(0.85,0.01,0.53,0.5,Facing_Forward,Fifth_Order);		// 目标KFS位置
+		Set_Target_point(0.85,0.01,0.48,0.5,Facing_Forward,Fifth_Order);		// 目标KFS位置
 		Set_Target_point(-0.01,0.341,0.83,2,Facing_Forward,Fifth_Order);		// 回收位置
 	}
 
@@ -1430,8 +1445,62 @@ void Class_Robotic_arm::Robotic_Button_Function()
 	if (Joint_Space_Preprocessing()==1)
 	{
 		path_finish_flag=0;
+		HAL_GPIO_WritePin(GPIOA,GPIO_PIN_0,GPIO_PIN_SET);
 	}
 }
 
+/*
+ * @brief S形速度规划核心函数，每个周期调用一次
+ */
+void Class_Robotic_arm::SCurve_Calculate(SCurveProfile *p)
+{
+	// 1. 位置误差
+	float err = p->target_pos - p->now_pos;
 
+	// 2. 期望速度（简单速度前馈，可改PID）
+	float vel_cmd = err * 4.0f;  // 系数根据响应调
+	vel_cmd = clamp(vel_cmd, -p->max_vel, p->max_vel);
+
+	// 3. 期望加速度（速度差 / 时间）
+	float acc_cmd = (vel_cmd - p->now_vel) / Shortest_Interval;
+
+	// 4. 加加速度限制（S 形核心：限制加速度变化率）
+	acc_cmd = clamp(acc_cmd,p->now_vel > vel_cmd ? -p->max_acc : -p->max_acc,p->now_vel > vel_cmd ?  p->max_acc :  p->max_acc);
+
+	float jerk_limit = p->max_jerk * Shortest_Interval;
+	float acc_delta = acc_cmd - (p->now_vel - p->now_vel) / Shortest_Interval;
+	acc_delta = clamp(acc_delta, -jerk_limit, jerk_limit);
+
+	float new_acc = (p->now_vel - p->now_vel) / Shortest_Interval + acc_delta;
+	new_acc = clamp(new_acc, -p->max_acc, p->max_acc);
+
+	// 5. 更新速度
+	float new_vel = p->now_vel + new_acc * Shortest_Interval;
+
+	// 防止过冲反向抖动
+	if((err > 0 && new_vel < 0) || (err < 0 && new_vel > 0)) {
+		new_vel = 0;
+	}
+
+	p->now_vel = new_vel;
+
+	// 6. 更新位置
+	p->now_pos += p->now_vel * Shortest_Interval;
+}
+
+// 上位机设置新目标点（你发坐标时调用）
+void Class_Robotic_arm::SetTargetPos(SCurveProfile *p, float target)
+{
+	p->target_pos = target;
+}
+
+// 超时停止：一段时间没收到新点，手动减速到0
+void Class_Robotic_arm::StopSlowly(SCurveProfile *p)
+{
+	if(p->now_vel > 0) {
+		p->now_vel = clamp(p->now_vel - p->max_acc * Shortest_Interval, 0, p->now_vel);
+	} else if(p->now_vel < 0) {
+		p->now_vel = clamp(p->now_vel + p->max_acc * Shortest_Interval, p->now_vel, 0);
+	}
+}
 
