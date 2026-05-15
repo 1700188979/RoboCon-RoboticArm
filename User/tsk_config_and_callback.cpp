@@ -252,22 +252,22 @@ void Task_Init()
     	RoboticArm.Robotic_Main();
 
 		tempFloat[0]=RoboticArm.DH_arm_motor[0].Next_Angle*180/PI;
-		tempFloat[1]=RoboticArm.DH_arm_motor[0].Next_Omega*180/PI;
-		tempFloat[2]=RoboticArm.DH_arm_motor[1].Next_Angle*180/PI;
-		tempFloat[3]=RoboticArm.DH_arm_motor[1].Next_Omega*180/PI;
-		tempFloat[4]=RoboticArm.DH_arm_motor[2].Next_Angle*180/PI;
-		tempFloat[5]=RoboticArm.DH_arm_motor[2].Next_Omega*180/PI;
-		tempFloat[6]=RoboticArm.DH_arm_motor[0].Now_Angle*180/PI;
-		tempFloat[7]=RoboticArm.DH_arm_motor[1].Now_Angle*180/PI;
-		tempFloat[8]=RoboticArm.DH_arm_motor[2].Now_Angle*180/PI;
-    	tempFloat[9]=RoboticArm.DH_arm_motor[3].Now_Angle*180/PI;
-    	tempFloat[10]=RoboticArmRecycling.recycling_motor_elevator.Get_Now_Angle()*180/PI;
-    	tempFloat[11]=RoboticArm.arm_motor4.Get_Now_Omega();
-		tempFloat[12]=IMUdata[1]*180/PI-2;
-		tempFloat[13]=Vofa_Slider1;
-		tempFloat[14]=Vofa_Slider2;
-		tempFloat[15]=Vofa_Slider3;
-    	tempFloat[16]=RoboticArm.KEYNUM;
+		tempFloat[1]=RoboticArm.DH_arm_motor[1].Next_Angle*180/PI;
+		tempFloat[2]=RoboticArm.DH_arm_motor[2].Next_Angle*180/PI;
+		tempFloat[3]=RoboticArm.DH_arm_motor[0].Now_Angle*180/PI;
+		tempFloat[4]=RoboticArm.DH_arm_motor[1].Now_Angle*180/PI;
+		tempFloat[5]=RoboticArm.DH_arm_motor[2].Now_Angle*180/PI;
+    	tempFloat[6]=RoboticArm.DH_arm_motor[3].Now_Angle*180/PI;
+    	tempFloat[7]=RoboticArm.DH_arm_motor[0].Torque;
+    	tempFloat[8]=RoboticArm.DH_arm_motor[1].Torque;
+    	tempFloat[9]=RoboticArm.DH_arm_motor[2].Torque;
+    	tempFloat[10]=RoboticArm.DH_arm_motor[3].Torque;
+		tempFloat[11]=IMUdata[1]*180/PI-2;
+		tempFloat[12]=Vofa_Slider1;
+		tempFloat[13]=Vofa_Slider2;
+		tempFloat[14]=Vofa_Slider3;
+    	tempFloat[15]=RoboticArm.KEYNUM;
+    	tempFloat[16]=RoboticArm.KFS_FLAG;
     	// tempFloat[17]=VESC_test_ID101.Get_Now_Vel();
 
 		Vofa_Transmit(&huart1,17);

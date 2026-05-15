@@ -40,16 +40,6 @@ Matrix4x4 matrix_multiply(Matrix4x4 T1, Matrix4x4 T2)
 }
 
 /**
- * @brief 限幅函数
- */
-float clamp(float x, float min, float max)
-{
-	if(x > max) return max;
-	if(x < min) return min;
-	return x;
-}
-
-/**
  * @brief 角度归一化
  */
 inline float Angle_Normalization(float theta)
@@ -85,10 +75,10 @@ void Class_Robotic_arm::Init()
 	arm_motor3.Set_K_P(100);
 	arm_motor4.Set_K_D(1);
 	arm_motor4.Set_K_P(0);
-	arm_motor3.Set_Control_Torque(10);
+	// arm_motor3.Set_Control_Torque(10);
 
 	//末端水平控制器
-	Horizontal_Controller.Init(35,15,0,0,0,5 );
+	Horizontal_Controller.Init(35,20,0,0,0,5 );
 	Horizontal_Controller.Set_Target(0);
 
 	Init_Maxtrix();
@@ -109,13 +99,13 @@ void Class_Robotic_arm::Init_Maxtrix()
 	DH_arm_motor[0].MAX_Angle=PI;
 	DH_arm_motor[0].MIN_Angle=0;
 	DH_arm_motor[0].Rotation=Reverse_Rotation;
-	DH_arm_motor[0].Reduction_Ratio=2.5;
-	DH_arm_motor[0].Next_Angle=0;
+	DH_arm_motor[0].Reduction_Ratio=2.0;
+	DH_arm_motor[0].Next_Angle=0.0;
 	DH_arm_motor[0].m=0.0f;
 	DH_arm_motor[0].p=0.0f;
 	DH_arm_motor[0].Torque=0.0f;
 
-	DH_arm_motor[1].a=0.280f;
+	DH_arm_motor[1].a=0.325f;
 	DH_arm_motor[1].d=0.0f;
 	DH_arm_motor[1].alpha=0;
 	DH_arm_motor[1].Now_Angle=65.0f/180.0f*PI;
@@ -125,8 +115,8 @@ void Class_Robotic_arm::Init_Maxtrix()
 	DH_arm_motor[1].Rotation=Forward_Rotation;
 	DH_arm_motor[1].Reduction_Ratio=2.0;
 	DH_arm_motor[1].Next_Angle=65.0f/180.0f*PI;
-	DH_arm_motor[1].m=1.05f;
-	DH_arm_motor[1].p=0.220f;
+	DH_arm_motor[1].m=0.86f;
+	DH_arm_motor[1].p=0.189f;
 	DH_arm_motor[1].Torque=0.0f;
 
 	DH_arm_motor[2].a=0.560f;
@@ -139,8 +129,8 @@ void Class_Robotic_arm::Init_Maxtrix()
 	DH_arm_motor[2].Rotation=Forward_Rotation;
 	DH_arm_motor[2].Reduction_Ratio=1.0;
 	DH_arm_motor[2].Next_Angle=-45.0f/180.0f*PI;
-	DH_arm_motor[2].m=0.6f;
-	DH_arm_motor[2].p=0.420f;
+	DH_arm_motor[2].m=0.7f;
+	DH_arm_motor[2].p=0.480f;
 	DH_arm_motor[2].Torque=0.0f;
 
 	DH_arm_motor[3].a=0.220f;//length
@@ -153,8 +143,8 @@ void Class_Robotic_arm::Init_Maxtrix()
 	DH_arm_motor[3].Rotation=Reverse_Rotation;
 	DH_arm_motor[3].Reduction_Ratio=1.0;
 	DH_arm_motor[3].Next_Angle=-45.0f/180.0f*PI;
-	DH_arm_motor[3].m=0.65f;
-	DH_arm_motor[3].p=0.150f;
+	DH_arm_motor[3].m=0.5f;
+	DH_arm_motor[3].p=0.180f;
 	DH_arm_motor[3].Torque=0.0f;
 
 	robot_cal_T(&DH_arm_motor[0]);
@@ -1024,13 +1014,13 @@ void Class_Robotic_arm::Robotic_Motor_Set()
 	{
 		arm_motor4.Set_Control_Omega(-Horizontal_Controller.Get_Out());
 		arm_motor4.Set_Control_Angle(0);
-		arm_motor4.Set_Control_Torque(DH_arm_motor[3].Torque/DH_arm_motor[3].Reduction_Ratio);
+		// arm_motor4.Set_Control_Torque(DH_arm_motor[3].Torque/DH_arm_motor[3].Reduction_Ratio);
 	}
 	else
 	{
 		arm_motor4.Set_Control_Omega(Horizontal_Controller.Get_Out());
 		arm_motor4.Set_Control_Angle(0);
-		arm_motor4.Set_Control_Torque(-DH_arm_motor[3].Torque/DH_arm_motor[3].Reduction_Ratio);
+		// arm_motor4.Set_Control_Torque(-DH_arm_motor[3].Torque/DH_arm_motor[3].Reduction_Ratio);
 	}
 }
 
@@ -1240,7 +1230,7 @@ void Class_Robotic_arm::Robotic_TIM_10ms_PeriodElapsedCallback()
 	Horizontal_Controller.Set_Now(-(IMUdata[1]-0.0349f));
 	Horizontal_Controller.TIM_Calculate_PeriodElapsedCallback();
 	//静力平衡前馈力矩计算
-	// Static_Equilibrium(0);
+	Static_Equilibrium();
 	//电机PID计算+
 	Robotic_TIM_Send_PeriodElapsedCallback();
 }
@@ -1276,7 +1266,7 @@ void Class_Robotic_arm::Air_Pump(uint8_t status)
 /*
  * @brief 计算机械臂各个电机的力矩
  */
-void Class_Robotic_arm::Static_Equilibrium(uint8_t IF_KFS)
+void Class_Robotic_arm::Static_Equilibrium()
 {
 	float a2 = DH_arm_motor[1].a;	// 关节3参数
 	float a3 = DH_arm_motor[2].a;	// 关节4参数
@@ -1304,20 +1294,19 @@ void Class_Robotic_arm::Static_Equilibrium(uint8_t IF_KFS)
 	float G2 = Gravitational_Acceleration * (m2 * p2 * c2 + a2 * c2 * (m3 + m4)) + G3;
 
 	// 总力矩
-	if (IF_KFS == 0)
+	DH_arm_motor[0].Torque = 0;
+	DH_arm_motor[1].Torque = G2;
+	DH_arm_motor[2].Torque = G3 * 2.7f;
+	DH_arm_motor[3].Torque = G4;
+
+	if (KFS_FLAG == 1)
 	{
 		DH_arm_motor[0].Torque = 0;
-		DH_arm_motor[1].Torque = G2;
-		DH_arm_motor[2].Torque = G3;
-		DH_arm_motor[3].Torque = G4;
+		DH_arm_motor[1].Torque += t2 * 1.97f;
+		DH_arm_motor[2].Torque += t3 * 1.5f;
+		DH_arm_motor[3].Torque += t4 * 2.0f;
 	}
-	else if (IF_KFS == 1)
-	{
-		DH_arm_motor[0].Torque = 0;
-		DH_arm_motor[1].Torque = t2 + G2;
-		DH_arm_motor[2].Torque = t3 + G3;
-		DH_arm_motor[3].Torque = t4 + G4;
-	}
+
 }
 
 /*
@@ -1398,17 +1387,23 @@ void Class_Robotic_arm::Robotic_Button_Function()
 	if (KEYNUM==1)
 	{
 		/* 吸取···高度 1 */
-		Set_Target_point(0.8,0.01,0.38,2,Facing_Forward,Third_Order);			// 目标KFS上方
-		Set_Target_point(0.85,0.01,0.13,0.5,Facing_Forward,Fifth_Order);		// 目标KFS位置
-		Set_Target_point(-0.01,0.341,0.83,2,Facing_Forward,Fifth_Order);		// 回收位置
+		// Set_Target_point(0.8,0.01,0.38,2,Facing_Forward,Third_Order);			// 目标KFS上方
+		// Set_Target_point(0.85,0.01,0.13,0.5,Facing_Forward,Fifth_Order);		// 目标KFS位置
+		// Set_Target_point(-0.01,0.341,0.83,2,Facing_Forward,Fifth_Order);		// 回收位置
+		// KFS_FLAG=0;
+		HAL_GPIO_WritePin(GPIOA,GPIO_PIN_0,GPIO_PIN_SET);
+
 	}
 
 	else if (KEYNUM==2)
 	{
 		/* 吸取···高度 2 */
-		Set_Target_point(0.8,0.01,0.48,2,Facing_Forward,Third_Order);			// 目标KFS上方
-		Set_Target_point(0.85,0.01,0.3,0.5,Facing_Forward,Fifth_Order);		// 目标KFS位置
-		Set_Target_point(-0.01,0.27,0.83,2,Facing_Forward,Fifth_Order);		// 回收位置
+		// Set_Target_point(0.8,0.01,0.48,2,Facing_Forward,Third_Order);			// 目标KFS上方
+		// Set_Target_point(0.85,0.01,0.3,0.5,Facing_Forward,Fifth_Order);		// 目标KFS位置
+		// Set_Target_point(-0.01,0.27,0.83,2,Facing_Forward,Fifth_Order);		// 回收位置
+		// KFS_FLAG=0;
+		HAL_GPIO_WritePin(GPIOA,GPIO_PIN_0,GPIO_PIN_RESET);
+
 	}
 
 	else if (KEYNUM==3)
@@ -1417,22 +1412,22 @@ void Class_Robotic_arm::Robotic_Button_Function()
 		Set_Target_point(0.8,0.01,0.58,2,Facing_Forward,Third_Order);			// 目标KFS上方
 		Set_Target_point(0.85,0.01,0.48,0.5,Facing_Forward,Fifth_Order);		// 目标KFS位置
 		Set_Target_point(-0.01,0.341,0.83,2,Facing_Forward,Fifth_Order);		// 回收位置
+		KFS_FLAG=0;
 	}
 
 	else if (KEYNUM==4)
 	{
 		/* 放KFS高度 */
 		Set_Target_point(0.8,0.01,0.58,2,Facing_Forward,Third_Order);			// 目标KFS上方
-		Set_Target_point(0.85,0.01,0.53,0.5,Facing_Forward,Fifth_Order);		// 目标KFS位置
-		Set_Target_point(-0.01,0.341,0.83,2,Facing_Forward,Fifth_Order);		// 回收位置
+		Set_Target_point(0.85,0.01,0.43,0.5,Facing_Forward,Fifth_Order);		// 目标KFS位置
+		KFS_FLAG=1;
 	}
 
 	else if (KEYNUM==5)
 	{
 		/* 吸取地上的KFS高度 */
 		Set_Target_point(0.8,0.01,0.58,2,Facing_Forward,Third_Order);			// 目标KFS上方
-		Set_Target_point(0.85,0.01,0.53,0.5,Facing_Forward,Fifth_Order);		// 目标KFS位置
-		Set_Target_point(-0.01,0.341,0.83,2,Facing_Forward,Fifth_Order);		// 回收位置
+		KFS_FLAG=0;
 	}
 
 	else
@@ -1445,62 +1440,6 @@ void Class_Robotic_arm::Robotic_Button_Function()
 	if (Joint_Space_Preprocessing()==1)
 	{
 		path_finish_flag=0;
-		HAL_GPIO_WritePin(GPIOA,GPIO_PIN_0,GPIO_PIN_SET);
+		// HAL_GPIO_WritePin(GPIOA,GPIO_PIN_0,GPIO_PIN_SET);
 	}
 }
-
-/*
- * @brief S形速度规划核心函数，每个周期调用一次
- */
-void Class_Robotic_arm::SCurve_Calculate(SCurveProfile *p)
-{
-	// 1. 位置误差
-	float err = p->target_pos - p->now_pos;
-
-	// 2. 期望速度（简单速度前馈，可改PID）
-	float vel_cmd = err * 4.0f;  // 系数根据响应调
-	vel_cmd = clamp(vel_cmd, -p->max_vel, p->max_vel);
-
-	// 3. 期望加速度（速度差 / 时间）
-	float acc_cmd = (vel_cmd - p->now_vel) / Shortest_Interval;
-
-	// 4. 加加速度限制（S 形核心：限制加速度变化率）
-	acc_cmd = clamp(acc_cmd,p->now_vel > vel_cmd ? -p->max_acc : -p->max_acc,p->now_vel > vel_cmd ?  p->max_acc :  p->max_acc);
-
-	float jerk_limit = p->max_jerk * Shortest_Interval;
-	float acc_delta = acc_cmd - (p->now_vel - p->now_vel) / Shortest_Interval;
-	acc_delta = clamp(acc_delta, -jerk_limit, jerk_limit);
-
-	float new_acc = (p->now_vel - p->now_vel) / Shortest_Interval + acc_delta;
-	new_acc = clamp(new_acc, -p->max_acc, p->max_acc);
-
-	// 5. 更新速度
-	float new_vel = p->now_vel + new_acc * Shortest_Interval;
-
-	// 防止过冲反向抖动
-	if((err > 0 && new_vel < 0) || (err < 0 && new_vel > 0)) {
-		new_vel = 0;
-	}
-
-	p->now_vel = new_vel;
-
-	// 6. 更新位置
-	p->now_pos += p->now_vel * Shortest_Interval;
-}
-
-// 上位机设置新目标点（你发坐标时调用）
-void Class_Robotic_arm::SetTargetPos(SCurveProfile *p, float target)
-{
-	p->target_pos = target;
-}
-
-// 超时停止：一段时间没收到新点，手动减速到0
-void Class_Robotic_arm::StopSlowly(SCurveProfile *p)
-{
-	if(p->now_vel > 0) {
-		p->now_vel = clamp(p->now_vel - p->max_acc * Shortest_Interval, 0, p->now_vel);
-	} else if(p->now_vel < 0) {
-		p->now_vel = clamp(p->now_vel + p->max_acc * Shortest_Interval, p->now_vel, 0);
-	}
-}
-

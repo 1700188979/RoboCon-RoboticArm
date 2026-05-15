@@ -8,12 +8,12 @@
 #include "dvc_motor_dji_h7.h"
 #include "dvc_motor_dm_h7.h"
 
-#define Shortest_Interval 0.01f                // 两点之间最小时间间隔1ms
+#define Shortest_Interval 0.01f                // 两点之间最小时间间隔10ms
 #define POS_MAX_NUM 50                          // 路径规划中间点+终点最多20个点
 #define Turning_Acceleration 0.5f               // 转向时的角加速度绝对值0.5m/(s*s)
 #define Suction_Distence 0.60f                  // 吸盘高度
 #define Gravitational_Acceleration 9.81f
-#define mg_KFS 0.0f
+#define mg_KFS 7.848f
 
 // 定义4x4矩阵结构体
 typedef struct {
@@ -87,7 +87,6 @@ typedef struct {
 
 /**
  * @brief 机械臂类
- *
  */
 class Class_Robotic_arm
 {
@@ -156,17 +155,11 @@ public:
 
     void Air_Pump(uint8_t status);
 
-    void Static_Equilibrium(uint8_t IF_KFS);
+    void Static_Equilibrium();
 
     void Robotic_Button_Scan();
 
     void Robotic_Button_Function();
-
-    void SCurve_Calculate(SCurveProfile *p);
-
-    void SetTargetPos(SCurveProfile *p, float target);
-
-    void StopSlowly(SCurveProfile *p);
 
     /*      从下至上为轴 1 2 3 4    */
     Class_Motor_DM_Normal arm_motor1;   //轴1 motor_DM_J4340
@@ -207,12 +200,11 @@ public:
     uint8_t intime_path_finish_flag=1; //即时处理标志
 
     uint8_t KEYNUM=0;
+
+    uint8_t KFS_FLAG=0;
 };
 
-
-
 Matrix4x4 matrix_multiply(Matrix4x4 T1, Matrix4x4 T2);
-float clamp(float x, float min, float max);
 inline float Angle_Normalization(float theta);
 #endif //ROBOTIC_ARM_H
 
