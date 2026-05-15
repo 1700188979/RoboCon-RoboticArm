@@ -1,1 +1,1 @@
-# 这是我在RoboCon比赛中调试的机械臂代码，包括MATLAB模型好、算法仿真以及VSCode解算和轨迹规划的代码验证，最后在CLion上实现。
+# This is the robotic arm code I debugged in the RoboCon competition, including the MATLAB model, algorithm simulation, and code verification for solving and trajectory planning in VSCode, finally implemented on CLion.
