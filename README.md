@@ -1,1 +1,1 @@
-# RoboCon-RoboticArm
+# 这是我在RoboCon比赛中调试的机械臂代码，包括MATLAB模型好、算法仿真以及VSCode解算和轨迹规划的代码验证，最后在CLion上实现。
